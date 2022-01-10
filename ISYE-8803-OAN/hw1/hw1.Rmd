@@ -1,0 +1,318 @@
+---
+title: "hw1"
+author: "Mark Pearl"
+date: "5/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#Import the required libraries
+library(splines)
+library(tidyverse)
+
+#Question 3
+#read_csv("1,2,3\n4,5,6", col_names = c("x", "y", "z"))
+coal_df <- read_csv('./P04.csv',col_names=c("year","energy"))
+y = coal_df$energy
+
+```
+
+```{r question3}
+
+#Question 3
+#read_csv("1,2,3\n4,5,6", col_names = c("x", "y", "z"))
+coal_df <- read_csv('./P04.csv',col_names=c("year","energy"))
+
+#Initialize variables used throughout the question
+n = length(coal_df$year)
+y = coal_df$energy
+```
+```{r question3a}
+#3a
+knots_vector <- c(6:15)
+error_a <- rep(0,length(y))
+mse_a <- rep(0,length(knots_vector))
+#Create lower order basis functions for cublic spline
+x = seq(0,1,length.out=length(coal_df$year))
+h1 = rep(1,length(x))
+h2 = x
+h3 = x^2
+h4 = x^3
+#Generate b-spline basis
+for (n_knots in c(1:length(knots_vector))) {
+  H = cbind(h1, h2, h3, h4)
+  knots = seq(0,1,length.out = knots_vector[n_knots]+2)
+  k = knots[2:(length(knots)-1)]
+  for (n in c(1:length(k))) {
+    h = (x-k[n])^3
+    h[h <= 0] = 0
+    H = cbind(H,h)
+    colnames(H)[n+4] <- paste("h", n+4, sep="")
+  }
+  for(i in c(1:length(y))){
+    H1 = H[-i,];
+    Y1 = y[-i];
+    H_removed = H[i,];
+    y_removed = y[i];
+    HS = solve(t(H1)%*%H1)%*%t(H1)%*%Y1
+    error_a[i] = y_removed -H_removed%*%HS
+    }
+  mse_a[n_knots]=sum(error_a^2)
+  flush.console()
+}
+
+layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+plot(knots_vector,mse_a,type = "l",ylab = 'MSE',xlab='# of Knots',main = 'MSE Chart for Cubic Splines')
+min_knot = knots_vector[which.min(mse_a)]
+points(min_knot,mse_a[which.min(mse_a)],col = "red", lwd=5)
+text(mse_a[which.min(mse_a)]~min_knot, labels=sprintf("%s Knots MSE: %s",min_knot,round(min(mse_a),2)),cex=0.9, font=2,pos=3)
+
+
+H = cbind(h1, h2, h3, h4)
+knots = seq(0,1,length.out = min_knot)
+k = knots[2:(length(knots)-1)]
+for (n in c(1:length(k))) {
+  h = (x-k[n])^3
+  h[h <= 0] = 0
+  H = cbind(H,h)
+  colnames(H)[n+4] <- paste("h", n+4, sep="")
+}
+
+HS = solve(t(H)%*%H)%*%t(H)%*%y
+plot(x,y,type = "l",ylab = 'Y Response for Energy',xlab='Year',main = 'Optimal Cubic Spline Function')
+lines(x,H%*%HS,col = "blue")
+```
+
+
+
+
+
+
+```{r question3b}
+#3b
+
+x = seq(1,length(coal_df$year))
+knots_vector <- c(6:15)
+error <- rep(0,length(y))
+mse_b <- rep(0,length(knots_vector))
+#Generate b-spline basis
+for (k in c(1:length(knots_vector))) {
+  knots = seq(1,length(coal_df$year),length.out = knots_vector[k])
+  order = 3
+  nbasis = knots_vector[k] + order - 2
+  print(nbasis)
+  B = bs(x, knots = knots, degree = 2,intercept = FALSE)[,1:nbasis]
+  for(i in c(1:length(y))){
+
+    B_new = B[-i,];
+    y_new = y[-i];
+    B_removed = B[i,];
+    y_removed = y[i];
+    BS = solve(t(B_new)%*%B_new)%*%t(B_new)%*%y_new
+    error[i] = y_removed -B_removed%*%BS
+
+  }
+  mse_b[k]=sum(error^2)
+  flush.console()
+}
+
+layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+plot(knots_vector,mse_b,type = "l",ylab = 'MSE',xlab='# of Knots',main = 'MSE Chart for B-Splines with Degree 2')
+min_knot = knots_vector[which.min(mse_b)]
+points(min_knot,mse_b[which.min(mse_b)],col = "red", lwd=5)
+text(mse_b[which.min(mse_b)]~min_knot, labels=sprintf("%s Knots MSE: %s",min_knot,round(min(mse_b),2)),cex=0.9, font=2,pos=3)
+
+
+knots = seq(1,length(coal_df$year),length.out = min_knot)
+order = 3
+nbasis = min_knot + order - 2
+B = bs(x, knots = knots, degree = 2,intercept = FALSE)[,1:nbasis]
+BS = B%*%solve(t(B)%*%B)%*%t(B)%*%y
+plot(x,y,type = "l",col = "red",ylab = 'y response for Energy',xlab='x for Year (1-69)',main = 'Optimal B-Splines Function Output')
+lines(x,BS,col = "blue")
+```
+
+
+
+```{r question3c}
+library(tuple)
+#3c
+#k  = length(coal_df$year)
+#k = 40
+x = c(1:length(coal_df$year))
+allspar = seq(0,1,length.out = 1000)
+p = length(allspar)
+error_c <- rep(0,length(y))
+mse_c <- rep(0,length(allspar))
+error_test <- matrix(0, nrow = length(y), ncol = 2)
+
+for(lambda in 1:p) {
+  for(i in c(1:length(y))){
+    y_new = y[-i];
+    y_removed = y[i];
+    sm = smooth.spline(y_new, spar = allspar[lambda], df=18)
+    ypred = predict(sm,x[i])
+    yhat = ypred$y
+    error_c[i] = y_removed - yhat
+    #error_test <- rbind(error_test, c(y_removed,yhat))
+  }
+  mse_c[lambda]=sum(error_c^2)
+} 
+#plot(x,y,type = "l",ylab = 'Energy',xlab='Year Index',main = 'Plot for Smoothing Splines')
+#lines(x_new,sm$y,col = "black",lwd=3)
+layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+plot(allspar,mse_c,type = "l",ylab = 'MSE',xlab='Lambda Value',main = 'MSE Chart for Smoothing Splines')
+min_lambda = allspar[which.min(mse_c)]
+points(min_lambda,mse_c[which.min(mse_c)],col = "red", lwd=5)
+text(mse_c[which.min(mse_c)]~min_lambda, labels=sprintf("Lambda with min MSE: %s",min(mse_c)),cex=0.9, font=2,pos=3)
+
+sm_optimal = smooth.spline(y, spar = min_lambda, df=18)
+plot(x,y,type = "l",col = "red",ylab = 'y response for Energy',xlab='x for Year (1-69)',main = 'Optimal Smoothing Splines Function Output')
+lines(x,sm_optimal$y,col = "blue")
+
+```
+
+
+```{r question3d}
+library(tuple)
+#3d
+# Data Genereation 
+x = c(1:length(coal_df$year))
+kerf = function(z){exp(-z*z/2)/sqrt(2*pi)}
+# leave-one-out CV
+h1=seq(0,1,length.out=1000)
+error_d = rep(0, length(y))
+mse_d = rep(0, length(h1))
+for(j in 1:length(h1))
+{
+  h=h1[j]
+  for(i in 1:length(y))
+  {
+    X1=x;
+    Y1=y;
+    X1=x[-i];
+    Y1=y[-i];
+    z=kerf((x[i]-X1)/h)
+    yke=sum(z*Y1)/sum(z)
+    error_d[i]=y[i]-yke
+  }
+  mse_d[j]=sum(error_d^2)
+}
+
+yke_final <- rep(0, length(y))
+for(i in 1:length(y))
+{
+  X1=x;
+  Y1=y;
+  X1=x[-i];
+  Y1=y[-i];
+  z=kerf((x[i]-X1)/h)
+  yke_final[i]=sum(z*Y1)/sum(z)
+}
+
+layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+plot(h1,mse_d,type = "l")
+h = h1[which.min(mse_d)]
+points(h,mse_d[which.min(mse_d)],col = "red", lwd=5)
+text(mse_d[which.min(mse_d)]~h, labels=sprintf("%s lambda with min MSE: %s",h,mse_d[which.min(mse_d)]),cex=1, font=2,pos=4)
+plot(x,y,type = "l",col = "red",ylab = 'y response for Energy',xlab='x for Year (1-69)',main = 'Optimal Gaussian Kernel')
+lines(x,yke_final,col = "blue")
+```
+
+```{r question4a}
+library(randomForest)
+#Read in data files and construct 
+ecg_train <- read.table(file = "./ECG200TRAIN", sep = ",")
+ecg_train_y <- ecg_train$V1
+ecg_train <- ecg_train[, !(colnames(ecg_train) %in% c("V1"))]
+ecg_train <- as.matrix(ecg_train)
+ecg_train_y[ecg_train_y < 0] <- 0
+
+ecg_test <- read.table(file = "./ECG200TEST", sep = ",")
+ecg_test_y <- ecg_test$V1
+ecg_test_y[ecg_test_y < 0] <- 0
+ecg_test <- ecg_test[, !(colnames(ecg_test) %in% c("V1"))]
+ecg_test <- as.matrix(ecg_test)
+
+
+#Conduct feature extraction using B-splines
+x = seq(0,1,length.out=length(colnames(ecg_train)))
+```
+
+```{r question4a}
+# Option 1: B-splines
+library(splines)
+knots = seq(0,1,length.out = 8)
+B = bs(x, knots = knots, degree = 3)[,1:10]
+Bcoef_train = matrix(0,dim(ecg_train)[1],10)
+Bcoef_test = matrix(0,dim(ecg_test)[1],10)
+train <- seq(1, dim(ecg_train)[1])
+test <- seq(dim(ecg_train)[1]+1,dim(ecg_train)[1]+dim(ecg_test)[1])
+train_test_split <- c(train,test)
+for(i in train_test_split)
+{
+  if (i %in% train) { 
+    Bcoef_train[i,] = solve(t(B)%*%B)%*%t(B)%*%ecg_train[i,]
+  }
+  else {
+    Bcoef_test[i-100,] = solve(t(B)%*%B)%*%t(B)%*%ecg_test[i-100,]
+  }
+}
+
+fit = randomForest(factor(ecg_train_y) ~ .,
+                   data=cbind.data.frame(as.data.frame(Bcoef_train),ecg_train_y))
+
+
+pred4a = predict(fit,Bcoef_test)
+cf_matrix <- table(ecg_test_y,pred4a)
+
+matplot(x,t(ecg_test[pred4a==0,]),type="l",col = "blue",ylab = "y",ylim = c(-4,4),main="Classification using B-spline coefficients")
+#
+X2 = ecg_test[pred4a == 1,]
+for(i in 1:length(pred4a[pred4a==1]))
+{
+  lines(x,X2[i,],col = "red")
+}
+
+
+```
+```{r question4a accuracy}
+library(caret)
+library(e1071)
+confusionMatrix(data=pred4a, reference=factor(ecg_test_y))
+```
+
+```{r question4a}
+# Option 2: FPCA
+library(fda)
+splinebasis = create.bspline.basis(c(0,1),10)
+
+smooth = smooth.basis(x,t(rbind(ecg_train,ecg_test)),splinebasis)
+Xfun = smooth$fd
+pca = pca.fd(Xfun, 10)
+var.pca = cumsum(pca$varprop)
+nharm = sum(var.pca < 0.95) + 1
+pc = pca.fd(Xfun, nharm)
+
+layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+plot(pc$scores[ecg_train_y==0,],xlab = "FPC-score 1", ylab = "FPC-score 2",col = "blue",ylim=c(-1,1))
+points(pc$scores[ecg_train_y==1,],col = "red")
+FPCcoef = pc$scores
+
+fit = randomForest(factor(ecg_train_y) ~ .,
+                   data=cbind.data.frame(as.data.frame(FPCcoef[train,]),ecg_train_y))
+pred4b = predict(fit,FPCcoef[-train,])
+#cf_matrix <- table(labtest,pred4b)
+matplot(x,t(ecg_test[pred4b==0,]),type="l",col = "blue",ylab = "y",ylim = c(-4,4),main="Classification using FPCA scores")
+#
+X2 = ecg_test[pred4b == 1,]
+for(i in 1:length(pred4b[pred4b==1]))
+{
+  lines(x,X2[i,],col = "red")
+}
+```
+```{r question4a accuracy}
+confusionMatrix(data=pred4b, reference=factor(ecg_test_y))
+```
+
+

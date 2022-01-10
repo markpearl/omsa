@@ -1,0 +1,10 @@
+,Model_Name,Model_Accuracy,Num_Features,Dataset
+0,gnb,0.97,All,divorce
+1,knn,0.97,All,divorce
+2,logistic,0.97,All,divorce
+3,gnb,0.94,2,divorce
+4,knn,0.91,2,divorce
+5,logistic,0.94,2,divorce
+6,gnb,0.56,All,digits
+7,knn,0.52,All,digits
+8,logistic,0.52,All,digits

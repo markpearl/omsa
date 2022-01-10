@@ -1,0 +1,152 @@
+---
+title: "HW5_Mark_Pearl_P2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(CombMSC)
+library(boot)
+library(leaps)
+library(MASS)
+library(glmnet)
+library(tidyverse)
+library(caret)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+# Ensure that the sampling type is correct
+RNGkind(sample.kind="Rejection")
+
+# Reading the data: 
+data = read.csv("GA_EDVisits.csv",header=TRUE) 
+data = na.omit(data)
+
+# Get names of the column 
+names = colnames(data) 
+attach(data)
+
+# Standardized predictors - use these variables in your modeling in addition to the predictors A5.9, A10.14
+sAvgDistS = scale(log(SpecDist)) 
+sAvgDistP = scale(log(PedDist))
+sMedianIncome = scale(MedianIncome) 
+sNumHospitals = scale(No.Hospitals)
+sPercentLessHS = scale(PercentLessHS) 
+sPercentHS = scale(PercentHS)
+
+# Define interaction terms
+DistA5.9 = sAvgDistS*A5.9 
+DistA10.14 = sAvgDistS* A10.14
+DistIncome = sAvgDistS*sMedianIncome 
+DistLessHS = sAvgDistS*sPercentLessHS
+DistHS = sAvgDistS*sPercentHS 
+DistPA5.9 = sAvgDistP*A5.9
+DistPA10.14 = sAvgDistP* A10.14 
+DistPIncome = sAvgDistP*sMedianIncome
+DistPLessHS = sAvgDistP*sPercentLessHS 
+DistPHS = sAvgDistP*sPercentHS
+
+# Define final data frame
+X1 = data.frame(A5.9, A10.14, sAvgDistS, sAvgDistP, sMedianIncome,sPercentLessHS,sPercentHS, sNumHospitals)
+X2 = data.frame(A5.9, A10.14, sAvgDistS, sAvgDistP, sMedianIncome,sPercentLessHS,sPercentHS, sNumHospitals,DistA5.9, DistA10.14, DistIncome,DistLessHS, DistHS, DistPA5.9, DistPA10.14, DistPIncome,DistPLessHS, DistPHS)
+Y = data.frame(ED.visits)
+# Set Seed to 100
+set.seed(100)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+model1 <- glm(ED.visits~.,data=X1,family="poisson")
+summary(model1)
+```
+
+```{r pressure, echo=FALSE}
+model2 <- glm(ED.visits~.,data=X2,family="poisson")
+summary(model2)
+AIC(model1, k=2)
+AIC(model2, k=2)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r, message=F, warning=F}
+minimum = lm(logBCF ~ 1, data=trainData)
+mod3 = step(model1, scope=list(lower=model1,upper=model2), direction="both", trace=FALSE)
+summary(mod3)
+```
+```{r, message=F, warning=F}
+mod3$anova
+```
+
+
+```{r, message=F, warning=F}
+alpha <- 0.05
+p_values <- summary(mod3)$coef[,4][10:18]
+p_values <= alpha
+```
+
+
+```{r, message=F, warning=F}
+set.seed(100)
+library(glmnet)
+
+mod4.cv =cv.glmnet(as.matrix(X), data$ED.visits, family="poisson", alpha = 1,
+type="deviance", nfolds=10)
+mod4 = glmnet(as.matrix(X), data$ED.visits, family="poisson", alpha=1,
+nlambda = 100)
+plot(mod4, xvar="lambda", label=TRUE, lwd=2)
+abline(v=log(mod4.cv$lambda.min), col='black', lty=2,lwd=2)
+abline(v=0, col='black', lty = 1, lwd=2)
+
+
+mod4.cv =cv.glmnet(as.matrix(X), data$ED.visits, family="poisson", alpha = 1,
+type="deviance", nfolds=10)
+mod4 = glmnet(as.matrix(X), data$ED.visits, family="poisson", alpha=1,
+nlambda = 100)
+plot(mod4, xvar="lambda", label=TRUE, lwd=2)
+abline(v=log(mod4.cv$lambda.min), col='black', lty=2,lwd=2)
+abline(v=0, col='black', lty = 1, lwd=2)
+
+```
+
+
+```{r, message=F, warning=F}
+cat("Lambda with lowest CV error:",
+mod4.cv$lambda.min)
+```
+
+```{r, message=F, warning=F}
+coef(mod4, s=mod4.cv$lambda[10])
+```
+
+```{r, message=F, warning=F}
+cat("Total variables selected when log-lambda = 0: ",
+sum(coef(mod4, s=exp(0))[,1] != 0) - 1, "\n")
+```
+
+```{r, message=F, warning=F}
+coef(mod4, s=mod4.cv$lambda.min)
+```
+
+```{r, message=F, warning=F}
+set.seed(100)
+mod6.cv = cv.glmnet(as.matrix(X), data$ED.visits, family="poisson", alpha=0.5,
+type="deviance",nfolds=10)
+mod6 = glmnet(as.matrix(X), data$ED.visits, family="poisson", alpha =0.5,
+nlambda = 100)
+plot(mod6, xvar="lambda", label=TRUE, lwd=2)
+abline(v=log(mod6.cv$lambda.min), col='black', lty=2, lwd=2)
+```
+
+
+```{r, message=F, warning=F}
+coef(mod6, s=mod6.cv$lambda.min)
+```

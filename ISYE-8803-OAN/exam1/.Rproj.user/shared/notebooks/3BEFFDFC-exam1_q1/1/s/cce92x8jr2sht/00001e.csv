@@ -1,0 +1,12 @@
+"0","library(glmnet)"
+"0","basis_matrix <- matrix(ncol=59,nrow=80)"
+"0","for (i in seq(1:80)){"
+"0","  s = smooth.spline(nir_train[,i], df = k+1, spar = spar)"
+"0","  basis_matrix[i,]= s$fit$coef"
+"0","}"
+"0",""
+"0","ridge <- glmnet(x=basis_matrix,y=y_train,alpha=0)"
+"0","predict(ridge,y_test)"
+"2","Error in predict.glmnet(ridge, y_test) : 
+  The number of variables in newx must be 59
+"

@@ -1,0 +1,4 @@
+"0","elastic = glmnet(as.matrix(X_train), as.matrix(y_train),alpha=lambda_elastic, family = ""gaussian"", intercept = FALSE, nfolds=20)"
+"0","y_elastic = predict(elastic, as.matrix(X_train), s = lambda_elastic)"
+"0","coef.elastic = matrix(coef(elastic, s = lambda_elastic))[2:(p+1)]"
+"0","plot(elastic, xvar = ""lambda"", label = TRUE)"

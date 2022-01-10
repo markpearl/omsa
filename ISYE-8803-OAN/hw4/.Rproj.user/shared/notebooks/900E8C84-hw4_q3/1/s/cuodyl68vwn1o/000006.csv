@@ -1,0 +1,3 @@
+"0","#Read in and cleanse the data"
+"0","nsc_train_x <- read.mat('./data/NSC.mat')$x[[1]]"
+"0","nsc_train_y <- read.mat('./data/NSC.mat')$y"

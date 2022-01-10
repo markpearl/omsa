@@ -1,0 +1,6 @@
+"0","Xfun = smooth$fd"
+"0","pca = pca.fd(Xfun, 10)"
+"0","var.pca = cumsum(pca$varprop)"
+"0","nharm = sum(var.pca < 0.95) + 1"
+"0","pc = pca.fd(Xfun, nharm)"
+"0","plot(pca$varprop, type='l')"

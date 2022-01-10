@@ -1,0 +1,303 @@
+---
+title: "final_exam_p2"
+author: "Mark Pearl"
+date: "4/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Final Exam
+
+```{r direct_marketing}
+direct_marketing_csv <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/final_p2/direct_marketing.csv',header=TRUE)
+```
+
+Q1
+
+```{r regression, echo=FALSE}
+regression <- lm(AmountSpent~Gender+Salary, data = direct_marketing_csv)
+summary(regression)
+```
+
+Q2
+```{r regression2, echo=FALSE}
+library(dummies)
+direct_marketing_csv <- cbind(direct_marketing_csv,dummy(direct_marketing_csv$Married,sep='_'))
+
+regression2 <- lm(AmountSpent~Gender+Salary+direct_marketing_csv_Married+direct_marketing_csv_Single, data=direct_marketing_csv)
+summary(regression2)
+```
+
+```{r boston, echo=FALSE}
+library(MASS)
+library(dplyr)
+library(glmnet)
+
+boston_df <- Boston
+
+boston_df <- boston_df %>%
+  mutate(Result = ifelse(medv > 30.0,1,0))
+
+
+logit <- glm(Result ~ crim+zn+indus+chas+nox+rm+age+dis+rad+tax+ptratio+black+lstat,data=boston_df, family="binomial")
+summary(logit)
+```
+
+```{r boston p3, echo=FALSE}
+library(caret)
+library(ROCR)
+library(cvAUC)
+
+
+options(scipen=999)
+pred = predict(logit, type="response")
+boston_df$output <- pred
+```
+
+
+```{r boston p4, echo=FALSE}
+library(MASS)
+library(dplyr)
+library(glmnet)
+library(cvAUC)
+boston_df <- Boston
+
+boston_df <- boston_df %>%
+    mutate(Result = ifelse(medv > 30.0,1,0)) %>% 
+    select(-medv)
+
+logit <- glm(Result ~ ., data = boston_df, family="binomial")
+
+summary(logit)
+
+boston_df$pred = as.integer(predict(logit, type = 'response') > 0.5)
+
+cor(boston_df$Result,
+      boston_df$pred)
+
+table(boston_df$Result, 
+      boston_df$pred)
+
+AUC(boston_df$Result, 
+    boston_df$pred)
+```
+
+
+```{r amazon, echo=FALSE}
+library(tidyquant)
+library(dplyr)
+df_amzn <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/final_p2/AMZN.csv',header=TRUE)
+df_amzn$RF <- 0.0019
+df_amzn$Date <- as.Date(df_amzn$Date, format = "%m/%d/%Y")
+
+df_amzn <- df_amzn %>%
+  tq_mutate(select = Adj_Close,
+               mutate_fun = periodReturn,
+               period = "daily",      # This argument calculates daily returns
+               col_rename = "monthly_returns")
+
+df_amzn_xts <- xts(df_amzn[,c("monthly_returns","RF")], order.by = df_amzn$Date)
+
+SharpeRatio(df_amzn_xts[2:24,1],df_amzn_xts[2:24,2])
+```
+
+```{r amazon p2, echo=FALSE}
+Return.cumulative(df_amzn$monthly_returns,geometric = FALSE)
+```
+
+
+```{r amazon p2, echo=FALSE}
+ups_csv <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/final_p2//UPS_KO.csv',header = TRUE, fileEncoding="UTF-8-BOM")
+ups_lm <- lm(UPS ~ Mkt_RF + SMB + HML,data=ups_csv)
+summary(ups_lm)
+ups_lm <- lm(KO ~ Mkt_RF + SMB + HML,data=ups_csv)
+summary(ups_lm)
+```
+
+
+```{r kag, echo=FALSE}
+library(dplyr)
+kag_csv <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/final_p2/KAG_conversion_data_wrangled.csv',header = TRUE, fileEncoding="UTF-8-BOM")
+
+kag_csv %>%
+  select(ad_id, CPC) %>%
+  filter(CPC == max(CPC))
+
+kag_csv %>%
+  select(ad_id,age,CPC) %>%
+  summarize(sum(CPC>=1)/length(CPC))
+  
+kag_csv %>%
+  select(age,campaign_id,Impressions) %>%
+  group_by(age) %>%
+  filter(campaign_id==936) %>%
+  summarize(sum(Impressions)/length(Impressions))
+  
+kag_csv %>%
+  select(age,Impressions) %>%
+  group_by(age) %>%
+  summarize(sum(Impressions))
+
+kag_csv %>%
+  select(age,campaign_id,CPC) %>%
+  group_by(campaign_id) %>%
+  summarize(sum(CPC)/length(CPC))
+
+kag_csv %>%
+  select(campaign_id,Impressions,Spent,ad_id) %>%
+  filter(Spent==0) %>%
+  group_by(campaign_id) %>%
+  summarise(sum(Impressions),sum(length(ad_id)))
+```
+```{r mm1, echo=FALSE}
+queue <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/final_p2/Queue.csv',header = TRUE)
+
+queue %>%
+  select(Customer_number,Day) %>%
+  group_by(Day) %>%
+  summarise(length(Customer_number))
+  
+
+
+```
+
+Queueing
+
+
+Libraries
+```{r}
+library(dplyr)
+library(queueing)
+library(readr)
+```
+
+
+Solutions:
+```{r}
+Queue <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/final_p2/Queue.csv',header = TRUE)
+
+# QUESTION 1
+Monday <- Queue[Queue$Day == 'Monday',]
+Monday <- filter(Queue, Day == "Monday")
+Tuesday <- filter(Queue, Day == "Tuesday")
+Wednesday <- filter(Queue, Day == "Wednesday")
+
+# Number of customers arriving on Monday
+number_of_customers_mon = nrow(Monday)
+number_of_customers_tue = nrow(Tuesday)
+number_of_customers_wed = nrow(Wednesday)
+
+# Average hourly arrival rate
+lambda_mon = number_of_customers_mon/7
+lambda_tue = number_of_customers_tue/8
+lambda_wed = number_of_customers_wed/7
+
+print(paste("The arrival rate on tuesday is ",lambda_tue," customers/hour"))
+print(paste("The arrival rate on Wednesday is ",lambda_wed," customers/hour"))
+
+
+# QUESTION 2
+# total service rate on the 3 days
+mu_mon = 140
+mu_tue = 120
+mu_wed = 200
+
+# Utilization rate
+utilization_mon = lambda_mon/mu_mon
+utilization_tue = lambda_tue/mu_tue
+utilization_wed = lambda_wed/mu_wed
+
+print(paste("The utilisation rate on Monday is", utilization_mon))
+print(paste("The utilisation rate on Tuesday is", utilization_tue))
+print(paste("The utilisation rate on Wednesday is", utilization_wed))
+
+# QUESTION 3
+# Average number of customers in the systerm per hour
+Ls_mon = lambda_mon/(mu_mon - lambda_mon)
+Ls_tue = lambda_tue/(mu_tue - lambda_tue)
+Ls_wed = lambda_wed/(mu_wed - lambda_wed)
+
+print(paste("The average number of customers in the system on Monday is", Ls_mon))
+print(paste("The average number of customers in the system on Tuesday is", Ls_tue))
+print(paste("The average number of customers in the system on Wednesday is", Ls_wed))
+
+# Average number of customers in the queue per hour
+Lq_mon = Ls_mon * utilization_mon
+Lq_tue = Ls_tue * utilization_tue
+Lq_wed = Ls_wed * utilization_wed
+
+print(paste("The average number of customers in the queue on Monday is", Lq_mon))
+print(paste("The average number of customers in the queue on Tuesday is", Lq_tue))
+print(paste("The average number of customers in the queue on Wednesday is", Lq_wed))
+
+
+# QUESTION 4
+# Average time customers spends in system (in hours)
+Ws_mon = Ls_mon/lambda_mon 
+Ws_tue = Ls_tue/lambda_tue
+Ws_wed = Ls_wed/lambda_wed
+
+print(paste("The average time a customer spends in the system on Monday is", Ws_mon))
+print(paste("The average time a customer spends in the system on Tuesday is", Ws_tue))
+print(paste("The average time a customer spends in the system on Wednesday is", Ws_wed))
+
+# Average time customers spends in Queue (in hours)
+Wq_mon = Lq_mon/lambda_mon
+Wq_tue = Lq_tue/lambda_tue
+Wq_wed = Lq_wed/lambda_wed
+
+print(paste("The average time a customer spends in the queue on Monday is", Ws_mon))
+print(paste("The average time a customer spends in the queue on Tuesday is", Ws_tue))
+print(paste("The average time a customer spends in the queue on Wednesday is", Ws_wed))
+
+
+# QUESTION 6
+#probability of 100 people in the system
+pn_mon = (1- utilization_mon)*((utilization_mon)^100)
+
+print(paste("Probability of having 100 customers in the system on Monday",pn_mon))
+
+```
+
+Question 6
+Queue Package in R
+```{r}
+#Inputs to our MM1 model
+i_mm1 <- NewInput.MM1(lambda = 90, mu = 120, n = 20)
+
+## Build the model
+o_mm1 <- QueueingModel(i_mm1)
+
+Report(o_mm1)
+
+```
+
+Daily Demand 
+
+```{r}
+#Inputs to our MM1 model
+library(forecast)
+d_demand <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/final_p2/Daily_Demand.csv',header = TRUE)
+d_demand <- d_demand[Reduce(`&`, lapply(d_demand, function(x) !is.na(x)  & is.finite(x))),]
+d_demand$Date <- as.Date(d_demand$Date, format = "%Y-%m-%d")
+d_demand_xts <- xts(d_demand[,c("total")], order.by = d_demand$Date)
+
+
+ses.goog <- ses(d_demand_xts,alpha=0.35,h = 5)
+accuracy(ses.goog)
+
+
+alpha <- seq(0.01,0.99,by=0.01)
+RMSE<-NA
+for (i in seq_along(alpha)) {
+  fit <- ses(d_demand_xts,alpha = alpha[i],h=20)
+  RMSE[i] <- accuracy(fit)[1,2]
+}
+
+alpha.fit <- data_frame(alpha,RMSE)
+alpha.min <- filter(alpha.fit,RMSE == min(RMSE))
+alpha.min
+```

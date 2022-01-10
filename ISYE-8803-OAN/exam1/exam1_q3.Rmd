@@ -1,0 +1,182 @@
+---
+title: "exam1-q3"
+author: "Mark Pearl"
+date: "6/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library(imager)
+library(pracma)
+library(R.matlab)
+library(cluster)    
+library(factoextra)
+library(profvis)
+library(magick)
+#install.packages("BiocManager")
+#BiocManager::install("EBImage")
+library(EBImage)
+library(ijtiff)
+
+# read a sample file (R logo)
+img <- read_tif("matlab.tif")
+```
+
+```{r cars}
+dim(img)[1:2]
+```
+
+The new image is now 333 by 188, which is exactly 1/3 of the original image size.
+
+2c) 
+c)  Convert the original image to a gray image and to a black and white image (using alevel of 0.5).
+
+```{r q2 c grayscale creation, black white}
+landscape_grayscale <- grayscale(img)
+display(landscape_grayscale)
+```
+
+```{r q2 c}
+par(mfrow=c(1,2))
+plot(landscape_grayscale,main='Grayscale Image')
+plot(landscape_bw,main = 'Black and White Image')
+frink <- image_read("https://jeroen.github.io/images/frink.png")
+```
+d) Show the histogram of the gray image. What observations can be made from this histogram?
+
+```{r q2 d}
+hist( x = landscape_grayscale, breaks = 256, xlab = '', ylab = '',ylim= c(0,20000), main='Histogram')
+```
+When observing the histogram, we can see that the darker portion of the images vary in intensity as well as provide much lower densities as seen on the far left of the histogram. The middle part of the histogram likely represents the grass / ground in front of the horse, the distribution varies much less compared to the other two groups of the image. This background of the image can be seen with the right part of the histogram, where the frequency is much higher since it takes up a majority of the image, the distribution is much thinner because the background image color does not vary a lot. 
+
+2e i) Linear Transformation
+
+```{r q2 e linear}
+landscape_grayscale_rescaled <- landscape_grayscale*255
+layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+linear = (256-1)-landscape_grayscale
+plot(linear,main = 'Linear / Negative Transformation on Horse Grayscale')
+hist( x = linear, breaks = 256, xlab = '', ylab = '',ylim= c(0,20000), main='Histogram for Negative/Linear Transformation')
+```
+The negative linear transformation will essentially invert the pixel to the opposite representation, so if it's a dark pixel it will now become lighter, etc. You can see this reflected in the histogram, as it's now the exact opposite compared to the original grayscale histogram.
+
+ii) Log Transformation c= 20
+
+```{r q2 e log 20}
+layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+log_20 = 20*log(landscape_grayscale_rescaled+1)
+plot(log_20,main = 'Log Transformation C=20')
+hist( x = log_20, breaks = 256, xlab = '', ylab = '',ylim= c(0,20000), main='Histogram for C=20')
+```
+
+```{r q2 e log c 40}
+layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+log_40 = 40*log(landscape_grayscale_rescaled+1)
+plot(log_40,main = 'Log Transformation C=40')
+hist( x = log_40, breaks = 256, xlab = '', ylab = '',ylim= c(0,20000), main='Histogram for C=40')
+```
+
+From the outputs of the log transformation, we can see that it's doing something similar to a shift, where we're seeing lower pixel densities  get shifted to the right and distribution for all 3 groups is much more compact. Therefore the resulting image is much brighter for both transformations. You shouldn't see much of a difference between C=20 and C=40.
+
+iii) Threshold 100 and 150
+
+```{r q2 e threshold}
+layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+level=100
+BW_100=landscape_grayscale_rescaled
+BW_100[landscape_grayscale_rescaled>level] = 1
+BW_100[landscape_grayscale_rescaled<=level] = 0
+plot(BW_100,main = 'Threshold Transformation Level = 100')
+level=150
+BW_150=landscape_grayscale_rescaled
+BW_150[landscape_grayscale_rescaled>level] = 1
+BW_150[landscape_grayscale_rescaled<=level] = 0
+plot(BW_150,main = 'Threshold Transformation Level = 150')
+```
+```{r q2 e threshold histograms bw100}
+#layout(matrix(c(1,1), ncol = 1, byrow = TRUE))
+bw100_hist <- hist( x = BW_100, breaks = 2, xlab = '', ylab = '',ylim= c(0,20000), main='Histogram for BW Threshold =100')
+plot(bw100_hist)
+```
+
+```{r q2 e threshold histograms bw160}
+layout(matrix(c(1,1), ncol = 1, byrow = TRUE))
+bw150_hist <- hist( x = BW_150, breaks = 2, xlab = '', ylab = '',ylim= c(0,20000), main='Histogram for BW Threshold =100')
+plot(bw150_hist)
+```
+
+Provided is the histogram showing the output of the black and white images produced from a threshold value of 100 and 150, respectively. We can see from the first result that the count for the white pixels is much higher, than as the threshold is increased to 150, the count goes up significantly as represented in the first bar. 
+
+iv) Histogram Shift
+```{r q2 e histogram shifting plot}
+#layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+U=225
+L=25
+s=50
+shifted_image=landscape_grayscale_rescaled+50
+shifted_image[landscape_grayscale_rescaled>U-s] = U
+shifted_image[landscape_grayscale_rescaled<L-s] = L
+plot(shifted_image, main='Plot shift with S=50')
+```
+
+```{r q2 e histogram shifting}
+hist( x = shifted_image, breaks = 256, xlab = '', ylab = '',ylim= c(0,20000), main='Histogram for Shifted Histogram s= 50')
+```
+```{r q2 e histogram stretch}
+#layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+lambda=200
+stretched_image=landscape_grayscale_rescaled
+min <- min(landscape_grayscale_rescaled)
+max <- max(landscape_grayscale_rescaled)
+stretched_image[(landscape_grayscale_rescaled-min/max-min)*lambda<0]=0
+stretched_image[(landscape_grayscale_rescaled-min/max-min)*lambda>0]=(landscape_grayscale_rescaled-min/max-min)*lambda
+plot(stretched_image, main='Stretched Histogram Lambda=200')
+```
+
+```{r q2 e stretching}
+hist( x = stretched_image, breaks = 256, xlab = '', ylab = '',ylim= c(0,20000), main='Histogram for Stretched Histogram Lambda= 200')
+```
+
+We can see the results when shifting the image that the lower density values from 0 to 50 get completely cut off, and therefore the image
+appears to be much brighter. For stretching we see that the densities get widened out. 
+
+```{r q2 f noisy image}
+#layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+#@U=225
+#noisy_matrix <- as.cimg(matrix(rnorm(n=dim(landscape_grayscale_rescaled)[1]*dim(landscape_grayscale_rescaled)[2],mean=0,sd=10),ncol=dim(landscape_grayscale_rescaled)[2]))
+noisy_matrix <- imnoise(dim(landscape_grayscale_rescaled)[1],dim(landscape_grayscale_rescaled)[2],mean=0,sd=100)
+noisy_image =landscape_grayscale_rescaled+noisy_matrix
+plot(noisy_image)
+```
+
+```{r denoised image}
+
+K <- array(0, dim=c(3,3,1))
+K[,,1] <- matrix(c(1/9,1/9,1/9,1/9,1/9,1/9,1/9,1/9,1/9), nrow = 3, ncol = 3)
+Yk <- filter2(as.matrix(noisy_image),K[,,1])
+plot(as.cimg(Yk))
+```
+After applying the transformation matrix to the noisy image, we can see that the clarity is much better compared to the noisy image. 
+
+```{r e original image sharpened}
+landscape_im <- readImage('./horse1-2.jpg')
+plot(landscape_im)
+```
+
+```{r q2 e original image sharpened 2}
+K <- array(0, dim=c(3,3,1))
+K[,,1] <- matrix(c(-1,-1,-1, -1,9,-1, -1,-1,-1), nrow = 3, ncol = 3)
+Yk <- filter2(landscape_im,K[,,1])
+plot(Yk)
+```
+This is the results for the sharpened image. 

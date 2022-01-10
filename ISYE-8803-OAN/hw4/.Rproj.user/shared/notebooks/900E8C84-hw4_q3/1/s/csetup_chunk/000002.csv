@@ -1,0 +1,73 @@
+"0","knitr::opts_chunk$set(echo = TRUE)"
+"2","Warning message:
+"
+"2","R graphics engine version 14 is not supported by this version of RStudio. The Plots tab will be disabled until a newer version of RStudio is installed. 
+"
+"0","library(R.matlab)"
+"2","R.matlab v3.6.2 (2018-09-26) successfully loaded. See ?R.matlab for help.
+"
+"2","
+Attaching package: ‘R.matlab’
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    getOption, isOpen
+
+"
+"0","library(rmatio)"
+"0","library(fda)"
+"2","Loading required package: splines
+"
+"2","Loading required package: Matrix
+"
+"2","Loading required package: fds
+"
+"2","Loading required package: rainbow
+"
+"2","Loading required package: MASS
+"
+"2","Loading required package: pcaPP
+"
+"2","Loading required package: RCurl
+"
+"2","
+Attaching package: ‘fda’
+
+"
+"2","The following object is masked from ‘package:graphics’:
+
+    matplot
+
+"
+"0","library(pracma)"
+"2","
+Attaching package: ‘pracma’
+
+"
+"2","The following objects are masked from ‘package:Matrix’:
+
+    expm, lu, tril, triu
+
+"
+"0","library(gglasso)"
+"0","library(rTensor)"
+"2","
+Attaching package: ‘rTensor’
+
+"
+"2","The following object is masked from ‘package:pracma’:
+
+    fnorm
+
+"
+"0","library(grpreg)"
+"2","
+Attaching package: ‘grpreg’
+
+"
+"2","The following object is masked from ‘package:MASS’:
+
+    select
+
+"

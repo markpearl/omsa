@@ -1,0 +1,65 @@
+---
+title: "hw5"
+author: "Mark Pearl"
+date: "7/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stats)
+library(mrbsizeR)
+library(base)
+library(QZ)
+library(CVXR) 
+```
+
+## HW5 Q1 notebook
+
+```{r q1}
+
+s_vector <- seq(1,128,1)
+source('l1eq_pd.R')
+
+num_experiments <- 10
+error_matrix <- matrix(0, num_experiments, 128)
+
+M <- 512
+N <- 256
+x_matrix <- matrix(0, 128, 128)
+error_vector <- rep(0,128)
+x_num <- seq(1,num_experiments,1)
+
+#Iterate through each experiement created
+for (num_x in x_num) {
+  print(paste0("Running experiment number ",num_x))
+  x_full <- rsparsematrix(512, 1, nnz = 512, rand.x=rnorm)
+  #Create A matrix consisting of guassian distribution of i.i.d variables 256 (rows) X 512 (columns)
+  A <- matrix(rnorm(N*M), nrow = N, ncol = M)  
+  #Iterate through each value in the s-vector representing number of sparse element in vector x
+  for (s in s_vector) {
+    x <- numeric(512)
+    ind <- sample(1:512, s) # select s random locations which will have non zero values
+    for (i in ind){
+      x[i] <- x_full[i]
+    }
+    #x <- rsparsematrix(512, 1, nnz = s, rand.x=rnorm)
+    y <- A%*%x
+    x0 <- t(A)%*%y
+    xp <- l1eq_pd(x0,A,y)
+    print(paste0(s,"/128 ","LHS: ",norm(xp-x,type='2'),"<=","RHS: ",10^-4*norm(x,type='2')," ",norm(xp-x,type='2') <= 10^-4*norm(x,type='2')))
+    
+    #10^-4*
+    if (norm(xp-x,type='2') <= 10^-4*norm(x,type='2')) {
+      error_vector[s]=1
+    }
+    else{
+      error_vector[s]=0
+    } 
+  }
+  error_matrix[num_x,]=error_vector
+}
+```
+``` {r output success/rate}
+plot(colMeans(error_matrix),type='l',xlab='Sparsity',ylab='Success Rate')
+```

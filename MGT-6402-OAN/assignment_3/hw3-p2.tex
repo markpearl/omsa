@@ -1,0 +1,791 @@
+\PassOptionsToPackage{unicode=true}{hyperref} % options for packages loaded elsewhere
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provides euro and other symbols
+\else % if luatex or xelatex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={hw3-p2},
+  pdfauthor={Mark Pearl},
+  pdfborder={0 0 0},
+  breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-2}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+
+\title{hw3-p2}
+\author{Mark Pearl}
+\date{4/15/2020}
+
+\begin{document}
+\maketitle
+
+\hypertarget{graded-homework-3-part-2}{%
+\subsection{Graded Homework \#3: Part
+2}\label{graded-homework-3-part-2}}
+
+Homework 3 - Part 2 is from Week 11 and 12 and weighs 4\% of your grade.
+It will require you to submit one file (HTML or PDF) which will be peer
+corrected by three of your peers. The TAs will also go through your
+submission and eventually assign the final marks.
+
+Submit ONE HTML or PDF file with your code and answers to these 8
+questions neatly labeled, clear and concise. Use RMarkdown to knit the
+file. You may work on the homework for as long as you like within the
+given window. As long as you do not click submit, you can enter and exit
+the assignment as many times as necessary during the time period that it
+is available. Again, please note, you should only click ``submit'' when
+you are completely finished with the assignment and ready to submit it
+for grading.
+
+Also, please remember that you are to complete this assignment on your
+own. Any help given or received constitutes cheating. If you have any
+general questions about the assignment, please post it to the Piazza
+board. If your question involves specific references to the answer to a
+question or questions, please be sure to mark your post as private.
+
+Instructions for Q.1 to 4
+
+Please use the Facebook Ad dataset KAG.csv (Links to an external site.)
+for the next set of questions. We advise solving these questions using R
+(preferably using dplyr library wherever applicable) after reviewing the
+code provided for Week 11 and other resources provided for learning
+dplyr in R Learning Guide.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{kag_csv <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{'C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/assignment_3/KAG.csv'}\NormalTok{)}
+\KeywordTok{head}\NormalTok{(kag_csv)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   X  ad_id campaign_id age gender interest Impressions Clicks Spent
+## 1 1 708746         916  32      0       15        7350      1  1.43
+## 2 2 708749         916  32      0       16       17861      2  1.82
+## 3 3 708771         916  32      0       20         693      0  0.00
+## 4 4 708815         916  32      0       28        4259      1  1.25
+## 5 5 708818         916  32      0       28        4133      1  1.29
+## 6 6 708820         916  32      0       29        1915      0  0.00
+##   Total_Conversion Approved_Conversion    CTR  CPC CostPerConv_Total
+## 1                2                   1 0.0136 1.43             0.715
+## 2                2                   0 0.0112 0.91             0.910
+## 3                1                   0 0.0000 0.00             0.000
+## 4                1                   0 0.0235 1.25             1.250
+## 5                1                   1 0.0242 1.29             1.290
+## 6                1                   1 0.0000 0.00             0.000
+##   CostPerConv_Approved
+## 1                 1.43
+## 2                 1.82
+## 3                 0.00
+## 4                 1.25
+## 5                 1.29
+## 6                 0.00
+\end{verbatim}
+
+\hypertarget{including-plots}{%
+\subsection{Including Plots}\label{including-plots}}
+
+Q.1 Which ad (provide ad\_id as the answer) among the ads that have the
+least CPC led to the most impressions?
+
+In this case I will determine the max impressions based on the CPC = 0.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(dplyr)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'dplyr' was built under R version 3.6.3
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'dplyr'
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+\end{verbatim}
+
+\begin{verbatim}
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{max}\NormalTok{(kag_csv[kag_csv}\OperatorTok{$}\NormalTok{CPC}\OperatorTok{==}\DecValTok{0}\NormalTok{,]}\OperatorTok{$}\NormalTok{Impressions)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 24362
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{kag_csv}\OperatorTok{$}\NormalTok{ad_id[kag_csv}\OperatorTok{$}\NormalTok{Impressions}\OperatorTok{==}\DecValTok{24362}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1121094
+\end{verbatim}
+
+Therefore the ad\_id is 1121094.
+
+Q.2 What campaign (provide campaign\_id as the answer) had spent least
+efficiently on brand awareness on an average(i.e.~most Cost per mille or
+CPM: use total cost for the campaign / total impressions in thousands)?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df_campaign <-}\StringTok{ }\KeywordTok{aggregate}\NormalTok{(.}\OperatorTok{~}\NormalTok{campaign_id, kag_csv, sum)}
+\NormalTok{df_campaign}\OperatorTok{$}\NormalTok{output <-}\StringTok{ }\NormalTok{df_campaign}\OperatorTok{$}\NormalTok{Spent}\OperatorTok{/}\NormalTok{df_campaign}\OperatorTok{$}\NormalTok{Impressions}
+\NormalTok{df_campaign }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(campaign_id, output)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   campaign_id       output
+## 1         916 0.0003100067
+## 2         936 0.0003559674
+## 3        1178 0.0002717564
+\end{verbatim}
+
+As you can see, campaign 936 had the least efficient spending.
+
+Q.3 Assume each conversion (`Total\_Conversion') is worth \$5, each
+approved conversion (`Approved\_Conversion') is worth \$50. ROAS (return
+on advertising spent) is revenue as a percentage of the advertising
+spent . Calculate ROAS and round it to two decimals.
+
+Make a boxplot of the ROAS grouped by gender for interest = 15, 21, 101
+(or interest\_id = 15, 21, 101) in one graph. Also try to use the
+function `+ scale\_y\_log10()' in ggplot to make the visualization look
+better (to do so, you just need to add `+ scale\_y\_log10()' after your
+ggplot function). The x-axis label should be `Interest ID' while the
+y-axis label should be ROAS. {[}8 points{]}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggplot2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'ggplot2' was built under R version 3.6.3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{calculate_ROAS <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(total_conversion, approved_conversion, spent) \{}
+    \KeywordTok{round}\NormalTok{(}\DecValTok{100} \OperatorTok{*}\StringTok{ }\NormalTok{(total_conversion }\OperatorTok{*}\StringTok{ }\DecValTok{5} \OperatorTok{+}\StringTok{ }\NormalTok{approved_conversion }\OperatorTok{*}\StringTok{ }\DecValTok{50}\NormalTok{) }\OperatorTok{/}\StringTok{ }\NormalTok{spent, }\DecValTok{2}\NormalTok{)}
+\NormalTok{\}}
+
+\NormalTok{kag_csv }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{select}\NormalTok{(interest, Total_Conversion, Approved_Conversion, Spent, gender) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{filter}\NormalTok{(interest }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{15}\NormalTok{,}\DecValTok{21}\NormalTok{,}\DecValTok{101}\NormalTok{)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{Gender =} \KeywordTok{factor}\NormalTok{(gender)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{ROAS =} \KeywordTok{calculate_ROAS}\NormalTok{(Total_Conversion, Approved_Conversion, Spent)) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{filter}\NormalTok{(}\KeywordTok{is.finite}\NormalTok{(ROAS)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{ordered}\NormalTok{(interest), }\DataTypeTok{y =}\NormalTok{ ROAS, }\DataTypeTok{color =}\NormalTok{ Gender)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_y_log10}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Interest ID"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{ylab}\NormalTok{(}\StringTok{"ROAS %"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"ROAS % Grouped By Interest, Gender"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{hw3-p2_files/figure-latex/q3-1.pdf}
+
+Q.4 Summarize the median and mean of ROAS by genders when campaign\_id
+== 1178.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{kag_csv }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{select}\NormalTok{(interest, Total_Conversion, Approved_Conversion, Spent, gender, campaign_id) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{filter}\NormalTok{(campaign_id }\OperatorTok{==}\StringTok{ }\DecValTok{1178}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{Gender =} \KeywordTok{factor}\NormalTok{(gender)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{ROAS =} \KeywordTok{calculate_ROAS}\NormalTok{(Total_Conversion, Approved_Conversion, Spent)) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{filter}\NormalTok{(}\KeywordTok{is.finite}\NormalTok{(ROAS)) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{group_by}\NormalTok{(interest,gender) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{Mean=}\KeywordTok{mean}\NormalTok{(ROAS),}\DataTypeTok{Median=}\KeywordTok{median}\NormalTok{(ROAS))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 80 x 4
+## # Groups:   interest [40]
+##    interest gender  Mean Median
+##       <int>  <int> <dbl>  <dbl>
+##  1        2      0 216.    85.2
+##  2        2      1 476.   142. 
+##  3        7      0 266.   186. 
+##  4        7      1  97.5   45.2
+##  5       10      0 120.   103. 
+##  6       10      1  91.0   56.5
+##  7       15      0 496.   164. 
+##  8       15      1 341.   119. 
+##  9       16      0 235.   113. 
+## 10       16      1  96.7   66.1
+## # ... with 70 more rows
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adv_csv <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{'C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/assignment_3/advertising1.csv'}\NormalTok{)}
+\KeywordTok{head}\NormalTok{(adv_csv)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   Daily.Time.Spent.on.Site Age Area.Income Daily.Internet.Usage
+## 1                    68.95  35    61833.90               256.09
+## 2                    80.23  31    68441.85               193.77
+## 3                    69.47  26    59785.94               236.50
+## 4                    74.15  29    54806.18               245.89
+## 5                    68.37  35    73889.99               225.58
+## 6                    59.99  23    59761.56               226.74
+##                           Ad.Topic.Line           City Male    Country
+## 1    Cloned 5thgeneration orchestration    Wrightburgh    0    Tunisia
+## 2    Monitored national standardization      West Jodi    1      Nauru
+## 3      Organic bottom-line service-desk       Davidton    0 San Marino
+## 4 Triple-buffered reciprocal time-frame West Terrifurt    1      Italy
+## 5         Robust logistical utilization   South Manuel    0    Iceland
+## 6       Sharable client-driven software      Jamieberg    1     Norway
+##             Timestamp Clicked.on.Ad
+## 1 2016-03-27 00:53:11             0
+## 2 2016-04-04 01:39:02             0
+## 3 2016-03-13 20:35:42             0
+## 4 2016-01-10 02:31:19             0
+## 5 2016-06-03 03:36:18             0
+## 6 2016-05-19 14:30:17             0
+\end{verbatim}
+
+Q.5
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\tightlist
+\item
+  We aim to explore the dataset so that we can better choose a model to
+  implement. Plot histograms for at least 2 of the continuous variables
+  in the dataset. Note it is acceptable to plot more than 2. {[}1
+  point{]}
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adv_csv}\OperatorTok{$}\NormalTok{Clicked.on.Ad <-}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(adv_csv}\OperatorTok{$}\NormalTok{Clicked.on.Ad)}
+\KeywordTok{hist}\NormalTok{(adv_csv}\OperatorTok{$}\NormalTok{Area.Income)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{hw3-p2_files/figure-latex/q5a-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{hist}\NormalTok{(adv_csv}\OperatorTok{$}\NormalTok{Daily.Internet.Usage)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{hw3-p2_files/figure-latex/q5a chart 2-1.pdf}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi})}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Again on the track of exploring the dataset, plot at least 2 bar
+  charts reflecting the counts of different values for different
+  variables. Note it is acceptable to plot more than 2. {[}1 point{]}
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{barplot}\NormalTok{(}\KeywordTok{table}\NormalTok{(adv_csv}\OperatorTok{$}\NormalTok{Age), }\DataTypeTok{main=}\StringTok{"Age Value Count"}\NormalTok{,}
+   \DataTypeTok{xlab=}\StringTok{"Age"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{hw3-p2_files/figure-latex/q5b-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{barplot}\NormalTok{(}\KeywordTok{table}\NormalTok{(adv_csv}\OperatorTok{$}\NormalTok{Country), }\DataTypeTok{main=}\StringTok{"Country Value Count"}\NormalTok{,}
+   \DataTypeTok{xlab=}\StringTok{"Country"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{hw3-p2_files/figure-latex/q5c-1.pdf} c) Plot boxplots
+for Age, Area.Income, Daily.Internet.Usage and Daily.Time.Spent.on.Site
+separated by the variable Clicked.on.Ad. To clarify, we want to create 4
+plots, each of which has 2 boxplots: 1 for people who clicked on the ad,
+one for those who didn't. {[}2 points{]}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adv_csv }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{select}\NormalTok{(Age, Area.Income, Daily.Internet.Usage, Daily.Time.Spent.on.Site, Clicked.on.Ad) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{ordered}\NormalTok{(Clicked.on.Ad), }\DataTypeTok{y =}\NormalTok{ Age, }\DataTypeTok{color =}\NormalTok{ Clicked.on.Ad)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Clicked On Ad"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Age"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Age Grouped by Click On Ad"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{hw3-p2_files/figure-latex/q5c 1-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adv_csv }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{select}\NormalTok{(Age, Area.Income, Daily.Internet.Usage, Daily.Time.Spent.on.Site, Clicked.on.Ad) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{ordered}\NormalTok{(Clicked.on.Ad), }\DataTypeTok{y =}\NormalTok{ Area.Income, }\DataTypeTok{color =}\NormalTok{ Clicked.on.Ad)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Clicked On Ad"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Income"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Income Grouped by Click On Ad"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{hw3-p2_files/figure-latex/q5c 2-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adv_csv }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{select}\NormalTok{(Age, Area.Income, Daily.Internet.Usage, Daily.Time.Spent.on.Site, Clicked.on.Ad) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{ordered}\NormalTok{(Clicked.on.Ad), }\DataTypeTok{y =}\NormalTok{ Daily.Time.Spent.on.Site, }\DataTypeTok{color =}\NormalTok{ Clicked.on.Ad)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Clicked On Ad"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Daily.Time.Spent.on.Site"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Daily Time Spent on Site Grouped by Click On Ad"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{hw3-p2_files/figure-latex/q5c 3-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{adv_csv }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{select}\NormalTok{(Age, Area.Income, Daily.Internet.Usage, Daily.Time.Spent.on.Site, Clicked.on.Ad) }\OperatorTok{%>%}
+\StringTok{    }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{ordered}\NormalTok{(Clicked.on.Ad), }\DataTypeTok{y =}\NormalTok{ Daily.Internet.Usage, }\DataTypeTok{color =}\NormalTok{ Clicked.on.Ad)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Clicked On Ad"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Daily.Internet.Usage"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Daily Internet Usage Grouped by Click On Ad"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{hw3-p2_files/figure-latex/q5c 4-1.pdf} d) Based on our
+preliminary boxplots, would you expect an older person to be more likely
+to click on the ad than someone younger? {[}2 points{]}
+
+Yes based on the results you can see that with increasing Age, people
+click more on the advertisement compared to the younger generation.
+
+Q.6
+
+Part (a) {[}3 points{]}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Make a scatter plot for Area.Income against Age. Separate the
+  datapoints by different shapes based on if the datapoint has clicked
+  on the ad or not.
+\end{enumerate}
+
+\includegraphics{hw3-p2_files/figure-latex/q6_a-1.pdf}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Based on this plot, would you expect a 31-year-old person with an Area
+  income of \$62,000 to click on the ad or not?
+\end{enumerate}
+
+You can see based on the plot you can see that it's highly likely the
+person matching these conditions did not click on the Ad.
+
+Part (b) {[}3 points{]}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Similar to part a), create a scatter plot for Daily.Time.Spent.on.Site
+  against Age. Separate the datapoints by different shapes based on if
+  the datapoint has clicked on the ad or not.
+\end{enumerate}
+
+\includegraphics{hw3-p2_files/figure-latex/q6_b-1.pdf}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Based on this plot, would you expect a 50-year-old person who spends
+  60 minutes daily on the site to click on the ad or not?
+\end{enumerate}
+
+Yes you could still likely say that they would click on the ad. However,
+this seems to be very close to the cut-off point where most observations
+start to become 0 or no for Clicked on Ad.
+
+Q.7
+
+Part (a) {[}2 points{]}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Now that we have done some exploratory data analysis to get a better
+  understanding of our raw data, we can begin to move towards designing
+  a model to predict advert clicks.
+\item
+  Generate a correlation funnel (using the correlation funnel package)
+  to see which of the variable in the dataset have the most correlation
+  with having clicked the advert.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(correlationfunnel)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: package 'correlationfunnel' was built under R version 3.6.3
+\end{verbatim}
+
+\begin{verbatim}
+## == correlationfunnel Tip #3 ================================================================================================
+## Using `binarize()` with data containing many columns or many rows can increase dimensionality substantially.
+## Try subsetting your data column-wise or row-wise to avoid creating too many columns.
+## You can always make a big problem smaller by sampling. :)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(dplyr)}
+
+\NormalTok{adv_csv_binarized_tbl <-}\StringTok{ }\NormalTok{adv_csv }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{Age=} \KeywordTok{as.numeric}\NormalTok{(Age),}
+         \DataTypeTok{Male =} \KeywordTok{factor}\NormalTok{(Male)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{binarize}\NormalTok{(}\DataTypeTok{n_bins=}\DecValTok{5}\NormalTok{, }\DataTypeTok{thresh_infreq =} \FloatTok{0.01}\NormalTok{, }\DataTypeTok{name_infreq =} \StringTok{"OTHER"}\NormalTok{, }\DataTypeTok{one_hot =} \OtherTok{TRUE}\NormalTok{)}
+
+\NormalTok{adv_csv_corr_tbl <-}\StringTok{ }\NormalTok{adv_csv_binarized_tbl }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{correlate}\NormalTok{(Clicked.on.Ad__}\DecValTok{1}\NormalTok{)}
+
+\NormalTok{adv_csv_corr_tbl }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(correlation)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{plot_correlation_funnel}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{hw3-p2_files/figure-latex/q7a-1.pdf} From the
+correlation plot, we can see that the first 4 varaibles containing the
+highest correlation to Click.on.Ad is
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Let's retrieve the 4 highest correlated variables to use for the logistic regression}
+\NormalTok{adv_csv_corr_tbl}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 32 x 3
+##    feature                  bin             correlation
+##    <fct>                    <chr>                 <dbl>
+##  1 Clicked.on.Ad            0                    -1    
+##  2 Clicked.on.Ad            1                     1    
+##  3 Daily.Time.Spent.on.Site -Inf_47.23            0.502
+##  4 Daily.Internet.Usage     -Inf_132.366          0.5  
+##  5 Daily.Internet.Usage     132.366_163.44        0.445
+##  6 Daily.Internet.Usage     224.836_Inf          -0.44 
+##  7 Daily.Time.Spent.on.Site 79.982_Inf           -0.42 
+##  8 Area.Income              -Inf_43644.412        0.41 
+##  9 Daily.Internet.Usage     198.948_224.836      -0.41 
+## 10 Daily.Time.Spent.on.Site 47.23_62.26           0.395
+## # ... with 22 more rows
+\end{verbatim}
+
+NOTE: Here we are creating the correlation funnel in regards to HAVING
+clicked the advert, rather than not. This will lead to a minor
+distinction in your code between the 2 cases. However, it will not
+affect your results and subsequent variable selection. Part (b) {[}2
+points{]}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Based on the generated correlation funnel, choose the 4 most covarying
+  variables (with having clicked the advert) and run a logistic
+  regression model for Clicked.on.Ad using these 4 variables.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#Let's retrieve the 4 highest correlated variables to use for the logistic regression}
+
+\NormalTok{logit <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(Clicked.on.Ad }\OperatorTok{~}\StringTok{ `}\DataTypeTok{Daily.Time.Spent.on.Site}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{Daily.Internet.Usage}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{Area.Income}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{Age}\StringTok{`}\NormalTok{, }\DataTypeTok{data=}\NormalTok{adv_csv,}
+             \DataTypeTok{family =} \StringTok{"binomial"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Output the summary of this model.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(logit)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = Clicked.on.Ad ~ Daily.Time.Spent.on.Site + Daily.Internet.Usage + 
+##     Area.Income + Age, family = "binomial", data = adv_csv)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.4578  -0.1341  -0.0333   0.0167   3.1961  
+## 
+## Coefficients:
+##                            Estimate Std. Error z value Pr(>|z|)    
+## (Intercept)               2.713e+01  2.714e+00   9.995  < 2e-16 ***
+## Daily.Time.Spent.on.Site -1.919e-01  2.066e-02  -9.291  < 2e-16 ***
+## Daily.Internet.Usage     -6.391e-02  6.745e-03  -9.475  < 2e-16 ***
+## Area.Income              -1.354e-04  1.868e-05  -7.247 4.25e-13 ***
+## Age                       1.709e-01  2.568e-02   6.655 2.83e-11 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 1386.3  on 999  degrees of freedom
+## Residual deviance:  182.9  on 995  degrees of freedom
+## AIC: 192.9
+## 
+## Number of Fisher Scoring iterations: 8
+\end{verbatim}
+
+Q.8 {[}4 points{]}
+
+Now that we have created our logistic regression model using variables
+of significance, we must test the model. When testing such models, it is
+always recommended to split the data into a training (from which we
+build the model) and test (on which we test the model) set. This is done
+to avoid bias, as testing the model on the data from which it is
+originally built from is unrepresentative of how the model will perform
+on new data. That said, for the case of simplicity, test the model on
+the full original dataset. Use type =``response'' to ensure we get the
+predicted probabilities of clicking the advert Append the predicted
+probabilities to a new column in the original dataset or simply to a new
+data frame. The choice is up to you, but ensure you know how to
+reference this column of probabilities. Using a threshold of 80\% (0.8),
+create a new column in the original dataset that represents if the model
+predicts a click or not for that person. Note this means probabilities
+above 80\% should be treated as a click prediction. Now using the caret
+package, create a confusion matrix for the model predictions and actual
+clicks. Note you do not need to graph or plot this confusion matrix. How
+many false-negative occurrences do you observe? Recall false negative
+means the instances where the model predicts the case to be false when
+in reality it is true. For this example, this refers to cases where the
+ad is clicked but the model predicts that it isn't
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ROCR)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Loading required package: gplots
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Attaching package: 'gplots'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:stats':
+## 
+##     lowess
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictLogit <-}\StringTok{ }\KeywordTok{predict}\NormalTok{(logit, }\DataTypeTok{type=}\StringTok{'response'}\NormalTok{)}
+\NormalTok{adv_csv}\OperatorTok{$}\NormalTok{output <-}\StringTok{ }\NormalTok{predictLogit}
+
+\KeywordTok{head}\NormalTok{(adv_csv)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   Daily.Time.Spent.on.Site Age Area.Income Daily.Internet.Usage
+## 1                    68.95  35    61833.90               256.09
+## 2                    80.23  31    68441.85               193.77
+## 3                    69.47  26    59785.94               236.50
+## 4                    74.15  29    54806.18               245.89
+## 5                    68.37  35    73889.99               225.58
+## 6                    59.99  23    59761.56               226.74
+##                           Ad.Topic.Line           City Male    Country
+## 1    Cloned 5thgeneration orchestration    Wrightburgh    0    Tunisia
+## 2    Monitored national standardization      West Jodi    1      Nauru
+## 3      Organic bottom-line service-desk       Davidton    0 San Marino
+## 4 Triple-buffered reciprocal time-frame West Terrifurt    1      Italy
+## 5         Robust logistical utilization   South Manuel    0    Iceland
+## 6       Sharable client-driven software      Jamieberg    1     Norway
+##             Timestamp Clicked.on.Ad      output
+## 1 2016-03-27 00:53:11             0 0.007678840
+## 2 2016-04-04 01:39:02             0 0.009738814
+## 3 2016-03-13 20:35:42             0 0.006892949
+## 4 2016-01-10 02:31:19             0 0.005057957
+## 5 2016-06-03 03:36:18             0 0.011744099
+## 6 2016-05-19 14:30:17             0 0.045802993
+\end{verbatim}
+
+We can see the results from the output of the original dataset that the
+prediction colum ``output'' has been added as a column.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{table}\NormalTok{(adv_csv}\OperatorTok{$}\NormalTok{Clicked.on.Ad,adv_csv}\OperatorTok{$}\NormalTok{output }\OperatorTok{>}\StringTok{ }\FloatTok{0.8}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    
+##     FALSE TRUE
+##   0   497    3
+##   1    36  464
+\end{verbatim}
+
+From our table result we can see that the False Negative in our case is
+3. Or in other words, this refers to 3 cases where the ad is clicked but
+the model predicts that it isn't.
+
+\end{document}

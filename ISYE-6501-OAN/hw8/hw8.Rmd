@@ -1,0 +1,114 @@
+---
+title: "Homework 8"
+author: "Mark Pearl"
+date: "3/4/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## 11.1 Using the crime data set uscrime.txt from Questions 8.2, 9.1, and 10.1, build a regression model using: 
+1. Stepwise regression
+2. Lasso
+3. Elastic net
+For Parts 2 and 3, remember to scale the data first – otherwise, the regression coefficients will be on
+different scales and the constraint won’t have the desired effect.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(glmnet) 
+library(ggplot2)
+library(gridExtra)
+library(caret)
+```
+
+
+```{r uscrime_data, include=TRUE}
+uscrime_data <- read.table('C:/Users/mjpearl/Desktop/omsa/ISYE-6501-OAN/hw8/data/uscrime.txt',header = TRUE, stringsAsFactors = FALSE)
+head(uscrime_data)
+```
+
+## Create Input Datasets to be used by all model types before scaling occurs
+
+
+1) Step-Wise Regression: This will be an incremental approach to determine the relevant features that account for the most variance on the target variable. Either method (i.e. backward or forward) will go through each feature and determine it's relevance based on the p-value
+
+```{r scale , echo=TRUE}
+#Remove So feature from the dataset as this is not required to normalize as it's a binary or
+stepwise_x_colnames = colnames(uscrime_data[,names(uscrime_data) != "So" & names(uscrime_data) != "Crime"])
+
+scale <- function(dataframe, cols) {
+  result <- dataframe # make a copy of the input data frame
+
+  for (j in cols) {
+    m <- mean(dataframe[,j])
+    std <- sd(dataframe[,j])
+
+    result[,j] <- sapply(result[,j], function(x) (x - m) / std)
+  }
+  return(result)
+}
+
+uscrime_data.norm <- scale(uscrime_data, stepwise_x_colnames)
+```
+
+We will now fit the variable using AIC as the validation critiera, and cross validation to split the relevant data into training, validation and test. We will use backward step-wise regression to start with the full feature set and determine based on the iterative p-value scores which features to keep. 
+
+```{r stepwise regression, echo=FALSE}
+ctrl <- trainControl(method = "repeatedcv", number = 5, repeats = 5)
+
+step_fit <- train(Crime ~ ., data = uscrime_data.norm, "lmStepAIC", scope = 
+                 list(lower = Crime~1, upper = Crime~.), direction = "backward",
+                 trControl=ctrl)
+
+
+``` 
+
+Now we're going to create a regression model based on the results of the Stepwise regression output to only include the features based on the highest AIC score. We'll first run the lm with the original dataset, followed by the reduced feature set produced from the stepwise output. 
+
+```{r lm 1 and 2, echo=FALSE}
+lm1 = lm(Crime ~  M.F+U1+Prob+U2+M+Ed+Ineq+Po1, data= uscrime_data.norm)
+
+lm2 = lm(Crime ~ M + So + Ed + Po1 + Po2 + LF + M.F + Pop + NW + U1 + 
+    U2 + Wealth + Ineq + Prob + Time, data=uscrime_data.norm)
+summary(lm1)
+print("Seperation between output for model1 and model2")
+summary(lm2)
+``` 
+As you can see the increase in score for the adjusted R2 taking into account the number of features, I would say that model1 with the features defined by stepwise is the better perfmorming model compared to model2. 
+
+2) Lasso Regression: This method will define the features with least importance with a coefficient score of 0 to exclude these features from the result. we will use k-fold cross validation with Mean-Square error as the validation metric.
+
+```{r lasso, include=FALSE}
+matrix_x <- as.matrix(uscrime_data.norm[,names(uscrime_data.norm) != "Crime"])
+matrix_y <- as.matrix(uscrime_data.norm$Crime)
+lasso = cv.glmnet(x=matrix_x, y=matrix_y, alpha=1, nfolds = 5, type.measure="mse", family="gaussian")
+```
+
+```{r lasso coef, include=TRUE}
+coef(lasso,s = lasso$lambda.min)
+```
+
+
+```{r lasso lm, include=TRUE}
+lasso_lm <- lm(Crime ~ M + So + Ed + Po1 + M.F + Pop + NW + U1 + U2 + Wealth + Ineq + Prob, data = uscrime_data.norm)
+summary(lasso_lm)
+```
+3- Elastic
+
+Elastic net can be configured to either use Ridge Regression or Lasso based on the alpha value. In our case we will specify an alpha of 0.5 to remain in the between the 0-1 range.
+
+```{r elastic fit coeffs , include=TRUE}
+
+elastic_net=cv.glmnet(x=matrix_x,y=matrix_y,alpha=0.5,
+                      nfolds = 5,type.measure="mse",family="gaussian")
+
+#Output the coefficients of the variables selected by Elastic Net
+
+coef(elastic_net, s=elastic_net$lambda.min)
+```
+
+```{r elastic lm, include=TRUE}
+elastic_lm <- lm(Crime ~ M + So + Ed + Po1 + Po2+ LF + M.F + NW + U1 + U2 + Wealth + Ineq + Prob, data = uscrime_data.norm)
+summary(elastic_lm)
+```

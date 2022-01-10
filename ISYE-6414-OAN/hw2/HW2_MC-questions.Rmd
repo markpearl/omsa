@@ -1,0 +1,42 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r fram data}
+data <- read.csv("C:/Users/mjpearl/Desktop/omsa/ISYE-6414-OAN/hw2/fram.csv", head = TRUE)
+data$SEX <- as.factor(data$SEX)
+data$CURSMOKE <- as.factor(data$CURSMOKE)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+lm1 <- lm(data$SYSBP ~ data$SEX + data$AGE + data$CURSMOKE + data$BMI)
+summary(lm1)
+```
+```{r pressure, echo=FALSE}
+data
+```
+
+```{r pressure, echo=FALSE}
+lm1$fitted.values
+```
+
+```{r pressure, echo=FALSE}
+data3 <- data[data$BMI>=30,]
+lm2 <- lm(data3$SYSBP ~ data3$SEX + data3$AGE + data3$CURSMOKE + data3$BMI)
+summary(lm2)
+```

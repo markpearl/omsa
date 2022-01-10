@@ -1,0 +1,5 @@
+"0","level=150"
+"0","BW_150=horse_grayscale_rescaled"
+"0","BW_150[horse_grayscale_rescaled>level] = 1"
+"0","BW_150[horse_grayscale_rescaled<=level] = 0"
+"0","plot(BW_150,main = 'Threshold Transformation Level = 150')"

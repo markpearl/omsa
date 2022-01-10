@@ -1,0 +1,2 @@
+"0","lambda_min = lambda_min_list[which.min(lambda_min_list)]"
+"0","points(which.min(lambda_min_list),lambda_min,col = ""red"", lwd=5)"

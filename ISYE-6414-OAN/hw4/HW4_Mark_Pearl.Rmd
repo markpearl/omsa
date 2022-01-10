@@ -1,0 +1,207 @@
+---
+title: "HW4 Peer Assessment"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Background
+
+The owner of a company would like to be able to predict whether employees will stay with the company or leave. The data contains information about various characteristics of employees. See below for the description of these characteristics.  
+
+## Data Description
+
+The data consists of the following variables:
+
+1. **Age.Group**: 1-9 (1 corresponds to teen, 2 corresponds to twenties, etc.) (numerical)
+2. **Gender**: 1 if male, 0 if female (numerical)
+3. **Tenure**: Number of years with the company (numerical)
+4. **Num.Of.Products**: Number of products owned (numerical)
+5. **Is.Active.Member**: 1 if active member, 0 if inactive member (numerical)
+6. **Staying**: Fraction of employees that stayed with the company for a given set of predicting variables
+
+## Read the data
+
+```{r}
+# import the data
+data = read.csv("hw4_data.csv", header=TRUE, fileEncoding="UTF-8-BOM")
+data$Staying = data$Stay/data$Employees
+head(data)
+```
+
+# Question 1: Fitting a Model - 6 pts
+
+Fit a logistic regression model using *Staying* as the response variable with *Num.Of.Products* as the predictor and logit as the link function. Call it **model1**.
+
+**(a) 2 pts - Display the summary of model1. What are the model parameters and estimates?**
+
+```{r}
+model1 <- glm(Staying ~ as.factor(Num.Of.Products), data=data,family="binomial",weights=Employees)
+summary(model1)
+```
+
+**(b) 2 pts - Write down the equation for the odds of staying.**
+
+We can model the equation for one variable as follows: 
+
+x = Num.Of.Products (in the example above)
+
+Probability of success given 1 predicting variable X = x is p = p(x) = Pr(Y=1 | x)
+Where in this case Y = 1 is Staying vs Y = 0 Not Staying
+
+Logit function ln (p/1-p) = e^2.0403 - 1.76683X is the log odds function
+
+
+**(c) 2 pts - Provide a meaningful interpretation for the coefficient for *Num.Of.Products* with respect to the log-odds of staying and the odds of staying.**
+
+We can interpret this coefficient as follows. Num.Of.Products = -1.76683. 
+
+Log Odds Ratio
+Use the coefficient only, a unit increase of Num.Of.Products decreases the log-odds of staying is by 1.76683 when Num.Of.Products = 2, holding all other predicting variables constant.
+Use the coefficient only, the log-odds ratio of not staying is 1.76683 higher when Num.Of.Products = 1 (baseline) holding all other predicting variables constant.
+
+Using Odds Ratio
+e^-1.76683 = 0.1911. The odds ratio of staying as based on the value of Num.Of.Products = 2 is 1-0.17 = 83% lower for Num.Of.Prodcuts =2 versus the baseline of Num.Of.Products = 1.
+1-e^-1.76683 = 5.232 (i.e. 100%) The odds ratio of staying as based on the value of Num.Of.Products = 1 is 100% 
+
+
+# Question 2: Inference - 9 pts 
+
+**(a) 3 pts - Using model1, find a 90% confidence interval for the coefficient for *Num.Of.Products*.**
+
+```{r}
+confint(model1,level=0.90)
+```
+
+**(b) 3 pts - Is model1 significant overall? How do you come to your conclusion?**
+```{r}
+1-pchisq(model1$null.deviance - deviance(model1),1)
+```
+H0: Bj = 0 for all coefficients
+HA: Bj != 0 for at least one coefficient
+
+Based on our resulting p-value is small (0.000005302652), we reject the null hypothesis and state the model contains at least one coefficient that is statistically significant, in our case we only have one coefficient, meaning the Num.Of.Products is statistically significant.
+
+**(c) 3 pts - Which coefficients are significantly nonzero at the 0.01 significance level? Which are significantly negative? Why?**
+Based on results we see that both the intercept and the coefficient Num.Of.Products are both significantly non-zero and our Num.Of.Products is significantly negative. 
+
+The result is negative because it provides an adverse effect on the result being stated based on the answer from part A, where we state that the log-odds ratio of staying vs non-staying is -1.76683 holding all other predicting variables constant.
+
+```{r}
+names(which(summary(model1)$coefficients[,4]<.01))
+```
+
+# Question 3: Goodness of fit - 9 pts
+
+**(a) 3.5 pts - Perform goodness of fit hypothesis tests using both deviance and Pearson residuals. What do you conclude? Explain the differences, if any, between these findings and what you found in Question 2b.**
+
+Using deviance residuals
+```{r}
+c(deviance(model1),1-pchisq(deviance(model1),length(data$Staying)-2))
+```
+Since our p-value = 1, we reject the fail to reject the null hypothesis meaning that our model fits the data. 
+```{r}
+pearson = residuals(model1,type="pearson")
+pearson.tvalue = sum(pearson^2)
+c(pearson.tvalue,1-pchisq(pearson.tvalue,length(data$Staying)-2))
+```
+Based on both of p-values = 1, we fail to reject the null hypothesis for both cases. Meaning our model is a good fit of the data.
+
+**(b) 3.5 pts - Perform visual analytics for checking goodness of fit for this model and write your observations. Be sure to address the model assumptions. Only deviance residuals are required for this question.**
+
+```{r}
+#Now we need to check the normality assumption for the response variable staying using a qqplot and histogram
+res = resid(model1,type="deviance")
+qqnorm(res,ylab="Std Residuals")
+qqline(res, col="blue",lwd=2)
+hist(res, 10, xlab="Std Residuals",main="")
+```
+
+When looking at the output of our histogram and qqplot, we can see that the residuals do not seem to follow a normal distribution as we're starting to see what looks to be a bimodal distribution as the values begin to increase again on the right tail of the distribution. 
+
+Based on the qqplot, we can also significant tails on each side of the line, which accounts for skewness.
+
+**(c) 2 pts - Calculate the dispersion parameter for this model. Is this an overdispersed model?**
+
+```{r}
+model
+```
+Based on dispersion parameter being less than 1, we can see that overdispersion is not a factor in our model. If our value was > 2 then we could have an overdispersed model.
+
+# Question 4: Fitting the full model- 20 pts
+
+Fit a logistic regression model using *Staying* as the response variable with *Age.Group*, *Gender*, *Tenure*, *Num.Of.Products*, and *Is.Active.Member* as the predictors and logit as the link function. Call it **model2**.
+
+```{r}
+model2 = glm(Staying ~ Age.Group + Gender + Tenure + Num.Of.Products + Is.Active.Member,
+data=data,family='binomial', weights=Employees)
+summary(model2)
+```
+
+**(a) 2.5 pts - Write down the equation for the probability of staying.**
+
+prob(Y=Staying|X) = e^-1.90330+1.229014*x1-0.551430*x2-0.551438*x3-0.003574*x4-1.428767*x5-
+
+
+
+```{r}
+
+
+```
+
+**(b) 2.5 pts - Provide a meaningful interpretation for the coefficients of *Age.Group* and *Is.Active.Member* with respect to the odds of staying.**
+
+
+
+**(c) 2.5 pts - Is *Is.Active.Member* significant given the other variables in model2?**
+
+
+
+**(d) 10 pts - Has your goodness of fit been affected? Repeat the tests, plots, and dispersion parameter calculation you performed in Question 3 with model2.**
+
+```{r}
+
+
+```
+
+**(e) 2.5 pts - Overall, would you say model2 is a good-fitting model? If so, why? If not, what would you suggest to improve the fit and why? Note, we are not asking you to spend hours finding the best possible model but to offer plausible suggestions along with your reasoning.**
+
+```{r}
+
+
+```
+
+# Question 5: Prediction - 6 pts
+
+Suppose there is an employee with the following characteristics:
+
+1. **Age.Group**: 2
+
+2. **Gender**: 0
+
+3. **Tenure**: 2
+
+4. **Num.Of.Products**: 2
+
+5. **Is.Active.Member**: 1
+
+**(a) 2 pts - Predict their probability of staying using model1.**
+
+```{r}
+
+
+```
+
+**(b) 2 pts - Predict their probability of staying using model2.**
+
+```{r}
+
+
+```
+
+**(c) 2 pts - Comment on how your predictions compare.**

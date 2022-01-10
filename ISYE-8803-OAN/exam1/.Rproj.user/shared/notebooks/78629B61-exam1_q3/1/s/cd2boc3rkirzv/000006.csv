@@ -1,0 +1,3 @@
+"0","landscape_grayscale <- grayscale(img)"
+"2","Image appears to already be in grayscale mode"
+"0","display(landscape_grayscale)"

@@ -1,0 +1,6 @@
+"0","mse_elastic = sum((y_test-y_elastic)^2)/nrow(X_test)"
+"0","mse_elastic"
+"1","[1]"
+"1"," 0.1622157"
+"1","
+"

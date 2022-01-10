@@ -1,0 +1,50 @@
+---
+title: "hw5"
+author: "Mark Pearl"
+date: "7/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(R.matlab)
+library(rmatio)
+library(flexclust)
+# library(matlib)
+```
+
+## HW5 Q4 RHKS
+
+1a)  Create a 2D Gaussian kernel basis (Gram matrix) by finding the Kronecker product of two 1D 
+Gaussian kernels with bandwidth 1. 
+
+```{r read data file and construct Guassian 1D Kernels }
+
+#Read in data representing image
+image <- read.mat('Peaks.mat')
+
+#Create 1D Guassian Kernel
+x <- (1:100)
+bwd <- 1
+#Gaussian1D =exp(-(dist(x)^2)/bwd)
+E <- as.matrix(dist(x, diag=T, upper=T))
+Gaussian1D <- exp(-E^2 / bwd)
+
+#Create K Gram matrix from the konecker product of the Guassian1D kernel
+K = kronecker(Gaussian1D,Gaussian1D)
+y = as.vector(image$Y)
+
+#Calculate the alpha parameter by an arbitrary lambda value
+lambda <- 0.04
+alpha <- solve(K + lambda * diag(dim(K)[1])) %*% y
+
+#Calculate prediction to show image 
+y_hat = K %*% alpha
+```
+
+```{r show outputs}
+library(matlab)
+par(mfrow=c(1,2))
+imagesc(image$Y, main ="Original y")
+imagesc(matrix(y_hat,nrow=100,ncol=100), main ="Predicted y_hat")
+```

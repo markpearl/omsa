@@ -1,0 +1,333 @@
+---
+title: "HW3 Peer Assessment"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Background
+
+The fishing industry uses numerous measurements to describe a specific fish.  Our goal is to predict the weight of a fish based on a number of these measurements and determine if any of these measurements are insignificant in determining the weigh of a product.  See below for the description of these measurments.  
+
+## Data Description
+
+The data consists of the following variables:
+
+1. **Weight**: weight of fish in g (numerical)
+2. **Species**: species name of fish (categorical)
+3. **Body.Height**: height of body of fish in cm (numerical)
+4. **Total.Length**: length of fish from mouth to tail in cm (numerical)
+5. **Diagonal.Length**: length of diagonal of main body of fish in cm (numerical)
+6. **Height**: height of head of fish in cm (numerical)
+7. **Width**: width of head of fish in cm (numerical)
+
+
+## Read the data
+
+```{r}
+# Import library you may need
+library(car)
+# Read the data set
+fishfull = read.csv("C:/Users/mjpearl/Desktop/omsa/ISYE-6414-OAN/hw3/Fish.csv",header=T, fileEncoding = 'UTF-8-BOM')
+row.cnt = nrow(fishfull)
+# Split the data into training and testing sets
+fishtest = fishfull[(row.cnt-9):row.cnt,]
+fish = fishfull[1:(row.cnt-10),]
+```
+
+*Please use fish as your data set for the following questions unless otherwise stated.*
+
+# Question 1: Exploratory Data Analysis [10 points]
+
+**(a) Create a box plot comparing the response variable, *Weight*, across the multiple *species*.  Based on this box plot, does there appear to be a relationship between the predictor and the response?**
+
+```{r boxplot for weight over species}
+boxplot(Weight~Species,data=fish)
+```
+
+Based on our results, we can see that the weight tends to differ significantly based on the Species type, and therefore can conclude there does appear to be a relationship with weight across the multiple species.
+
+**(b) Create plots of the response, *Weight*, against each quantitative predictor, namely **Body.Height**, **Total.Length**, **Diagonal.Length**, **Height**, and **Width**.  Describe the general trend of each plot.  Are there any potential outliers?**
+
+```{r plot Weight vs Height}
+par(mfrow=c(2,3))
+plot(Weight~Height, data=fish)
+plot(Weight~ Body.Height, data=fish)
+plot(Weight~Diagonal.Length, data=fish)
+plot(Weight~Width, data=fish)
+plot(Weight~ Total.Length, data=fish)
+```
+When observing the first plot on the top left, we can see a general linear trend between the height and the weight. When looking at the observations on the top left, one could argue that these 4 observations could be classified as outliers, however, they're not drastically far off from the 3rd quartile of observations, so one would need to do a regression with and without these observations to really assess the impact.
+
+We can see from the last 4 plots that there exhibits a nice linear relationship between the response and this predictor variable. However there does seem to be an influential point that seems to be far from the means of both the x and y and is situated in the top left portion of each plot.
+
+```{r plot of everything}
+nums <- unlist(lapply(fish, is.numeric))  
+plot(fish[ , nums])
+```
+
+
+**(c) Display the correlations between each of the variables.  Interpret the correlations in the context of the relationships of the predictors to the response and in the context of multicollinearity.**
+
+```{r correlation code}
+cor(fishfull[ , nums])
+```
+Based on our correlation chart, we can see that we're exhibiting high correlation between the response variable and all attributes, except for the Height attribute, however 0.69% is still a modest correlation score. We can also see we're exhibiting multicollinearity because several variables are showing high correlation with other predictive variables (i.e. Body Height and Total Length = 0.99% correlation).  
+
+
+**(d) Based on this exploratory analysis, is it reasonable to assume a multiple linear regression model for the relationship between *Weight* and the predictor variables?**
+Yes,  based on this initial assessment a multiple linear regression model appears to be reasonable for the
+relationship between Weight and all the predictor variables.Even though we're experiencing multicollinearity, it doesn't mean that we don't have predictive variables that provide high explanatory power for the response variable weight. When we address the outliers and multicollinearity with feature selection criteria, we should reasonably have a model with high explanatory power. 
+
+
+# Question 2: Fitting the Multiple Linear Regression Model [11 points]
+
+*Create the full model without transforming the response variable or predicting variables using the fish data set.  Do not use fishtest*
+
+**(a) Build a multiple linear regression model, called model1, using the response and all predictors.  Display the summary table of the model.**
+
+```{r model1}
+Species <- as.factor(fish$Species)
+model1 <- lm(Weight~Height+Body.Height+Total.Length+Diagonal.Length+Height+Width+Species ,data=fish)
+summary(model1)
+```
+
+
+**(b) Is the overall regression significant at an $\alpha$ level of 0.01?**
+
+Since $\alpha$ = 0.01 exceeds the observed significance level, p = <2.2e-16, we reject the null hypothesis. The data provide strong evidence that at least one of the slope coefficients is nonzero. The overall model appears to be statistically useful in predicting weight
+
+**(c) What is the coefficient estimate for *Body.Height*? Interpret this coefficient.**
+The result means that holding all other predictors constant, a 1 unit increase in Body.Height, we will see a -176.87 reduction in Weight. This coefficient does appear to be statistically significant as the p-value 0.004583 < alpha-level. However, we tend to see drastic changes in the results of the coefficients with these values, which may be alluding to potential multicollinearity.
+
+
+**(d) What is the coefficient estimate for the *Species* category Parkki? Interpret this coefficient.**
+Based on our approach for using as.factor for dummy variables, the Parkki variable is the baseline dummy variable for the rest of the species types.
+
+The result means that holding all other predictors constant, having a species value of Parkki, is associated with a 79.34 increase in the value for Weight. This coefficient does not appear to be statistically significant as the p-value 0.550918 > alpha-level  
+
+
+# Question 3: Checking for Outliers and Multicollinearity [9 points]
+
+**(a) Create a plot for the Cook's Distances. Using a threshold Cook's Distance of 1, identify the row numbers of any outliers.**
+
+```{r cooks distance plot}
+cook = cooks.distance(model1)
+plot(cook,type="h",lwd=3,col='red',ylab = "Cook's Distance")
+```
+
+```{r cook distance identify row with outlier}
+cook[cook>1]
+```
+
+Based on the results, we can see that there's one outlier acting as a heavy influence point, as it's Cook's distance is > 1 for a value of 1.423786. 
+
+**(b) Remove the outlier(s) from the data set and create a new model, called model2, using all predictors with *Weight* as the response.  Display the summary of this model.**
+
+```{r model2 removeRows function}
+removeRows <- function(rowNum, data) {
+      newData <- data[-rowNum, , drop = FALSE]
+      rownames(newData) <- NULL
+      newData
+}
+
+fish2 = removeRows(30,fish)
+model2 <- lm(Weight~Height+Body.Height+Total.Length+Diagonal.Length+Height+Width+Species ,data=fish2)
+summary(model2)
+```
+We can see from the result that removing this outlier had a drastic increase on the model's performance as the R2 coefficient of determinant went up from 0.79 to 0.9335. 
+
+**(c) Display the VIF of each predictor for model2. Using a VIF threshold of max(10, 1/(1-$R^2$) what conclusions can you draw?**
+
+```{r vif model2}
+vif(model2)
+```
+
+Based on our result, we can see that all GVIF values are > 10 and 1/(1-0.9335)=15. Therefore, we can conclude that we are exhibiting multicollinearity in our model for all predicting variables.
+
+# Question 4: Checking Model Assumptions [9 points]
+
+*Please use the cleaned data set, which have the outlier(s) removed, and model2 for answering the following questions.*
+
+**(a) Create scatterplots of the standardized residuals of model2 versus each quantitative predictor. Does the linearity assumption appear to hold for all predictors?**
+
+```{r linearity assumption}
+library(MASS)
+fits = model2$fitted.values
+resids = stdres(model2)
+par(mfrow=c(2,3))
+plot(fish2$Total.Length,resids,xlab='Total Length',ylab='Residuals')
+plot(fish2$Diagonal.Length,resids,xlab='Diagonal Length',ylab='Residuals')
+plot(fish2$Width,resids,xlab='Width',ylab='Residuals')
+plot(fish2$Body.Height,resids,xlab='Body Height',ylab='Residuals')
+plot(fish2$Height,resids,xlab='Height',ylab='Residuals')
+```
+
+We can see from our results that our predictive variables are scattered evenly across the 0 line when compared against the standardized residuals, and therefore our linearity assumption holds. 
+
+
+**(b) Create a scatter plot of the standardized residuals of model2 versus the fitted values of model2.  Does the constant variance assumption appear to hold?  Do the errors appear uncorrelated?**
+
+```{r constant variance assumption}
+plot(fits,resids,xlab='Fitted Values',ylab='Residuals',col='darkblue')
+```
+Based on the result of our plot, we can see that the variance seems to be spread out evenly along the 0 line and don't seem to form any cone shapes as our values increase. There does seem to be a few outlier values > 3, but the general range of values seems to -2 to 2, which is consistent across most of the plot. When we look at values from 200 to 750 on the x-axis, we could argue that a cone-shape is starting to emerge, however this seems to flatten out > 750 and a constant variance emerges again. Therefore, overall I will say the constant variance assumption holds.
+
+**(c) Create a histogram and normal QQ plot for the standardized residuals. What conclusions can you draw from these plots?**
+
+```{r normality assumption}
+par(mfrow=c(1,2))
+hist(resids,xlab='Residuals',main="Histogram for Residuals")
+qqPlot(resids,ylab='Residuals',main="QQ Plot for Residuals")
+```
+From our results we can see that the normality assumption does not hold as our histogram is show a slight skewness, which is reaffirmed in our qqplot as there seems to be a significant tale forming at the end of the plot. 
+
+
+# Question 5 Partial F Test [6 points]
+
+**(a) Build a third multiple linear regression model using the cleaned data set without the outlier(s), called model3, using only *Species* and *Total.Length* as predicting variables and *Weight* as the response.  Display the summary table of the model3.**
+
+```{r model3 summary}
+model3 = lm(Weight~Species+Total.Length,data=fish2)
+summary(model3)
+```
+
+
+
+**(b) Conduct a partial F-test comparing model3 with model2. What can you conclude using an $\alpha$ level of 0.01?**
+
+```{r f-test model3 vs model2}
+anova(model3,model2)
+```
+
+H0: a = 0 Meaning that the additional variable does not provide any additional explanatory power
+HA: a != 0 Meaning that the additional variable does provide additional explanatory power
+
+Based on our results, we see a p-value for the partial F-test of 0.14 which is > alpha level 0.01. This means that we reject the null hypothesis, meaning that 1 or more variables that we've excluded as part of model3 do provide explanatory power against the response variable Weight.
+
+# Question 6: Reduced Model Residual Analysis and Multicollinearity Test [10 points]
+
+**(a) Conduct a multicollinearity test on model3.  Comment on the multicollinearity in model3.**
+```{r vif model3}
+vif(model3)
+```
+From our result, we can see that the VIF < 10, and therefore we are not exhibiting any multicollinearity in  our model3.
+
+
+**(b) Conduct residual analysis for model3 (similar to Q4). Comment on each assumption and whether they hold.**
+```{r model3 linearity assumption}
+fits3 = model3$fitted.values
+resids3 = stdres(model3)
+par(mfrow=c(2,3))
+plot(fish2$Total.Length,resids3,xlab='Total Length',ylab='Residuals')
+plot(fish2$Diagonal.Length,resids3,xlab='Diagonal Length',ylab='Residuals')
+plot(fish2$Width,resids3,xlab='Width',ylab='Residuals')
+plot(fish2$Body.Height,resids3,xlab='Body Height',ylab='Residuals')
+plot(fish2$Height,resids3,xlab='Height',ylab='Residuals')
+```
+
+Similar to the previous result, we can see that the observations are spread across the 0 line, and therefore our linearity assumptions holds.
+
+```{r model3 constant variance assumption}
+plot(fits3,resids,xlab='Fitted Values',ylab='Residuals',col='darkblue')
+```
+Based on the result of our plot, we can see that the variance seems to be spread out evenly along the 0 line and don't seem to form any cone shapes as our values increase. There does seem to be a few outlier values > 3, but the general range of values seems to -2 to 2, which is consistent across most of the plot. When we look at values from 200 to 750 on the x-axis, we could argue that a cone-shape is starting to emerge, however this seems to flatten out > 750 and a constant variance emerges again. Therefore, overall I will say the constant variance assumption holds.
+
+
+```{r model3 normality assumption}
+library(car)
+par(mfrow=c(1,2))
+hist(resids3,xlab='Residuals',main="Histogram for Residuals")
+qqPlot(resids3,ylab='Residuals',main="QQ Plot for Residuals")
+```
+Similar to the previous result, from our results we can see that the normality assumption does not hold as our histogram is show a slight skewness, which is reaffirmed in our qqplot as there seems to be a significant tale forming at the end of the plot. 
+
+# Question 7: Transformation [12 pts]
+
+**(a) Use model3 to find the optimal lambda, rounded to the nearest 0.5, for a Box-Cox transformation on model3.  What transformation, if any, should be applied according to the lambda value?  Please ensure you use model3**
+
+```{r}
+bc <- boxcox(model3,data=fish2)
+```
+```{r}
+bc$x[which.max(bc$y)]
+```
+When we look for the highest lambda value on this chart and round to the nearest 0.5, we can see that our lambda value = 0.5. Therefore, the suggest transformation would be to take the square root of the response variable.
+
+**(b) Based on the results in (a), create model4 with the appropriate transformation. Display the summary.**
+```{r model4 summary}
+model4 <- lm(sqrt(Weight)~Species+Total.Length,data=fish2)
+summary(model4)
+```
+
+**(c) Perform Residual Analysis on model4. Comment on each assumption.  Was the transformation successful/unsuccessful?**
+```{r model4 linearity assumption}
+fits4 = model4$fitted.values
+resids4 = stdres(model4)
+par(mfrow=c(2,3))
+plot(fish2$Total.Length,resids4,xlab='Total Length',ylab='Residuals')
+plot(fish2$Diagonal.Length,resids4,xlab='Diagonal Length',ylab='Residuals')
+plot(fish2$Width,resids4,xlab='Width',ylab='Residuals')
+plot(fish2$Body.Height,resids4,xlab='Body Height',ylab='Residuals')
+plot(fish2$Height,resids4,xlab='Height',ylab='Residuals')
+```
+Based on our results we can see that linearity assumption holds as the results are spreadout evenly across 0.
+```{r model4 constant variance assumption}
+plot(fits4,resids4,xlab='Fitted Values',ylab='Residuals')
+```
+From our result we can see that we have an improvement when assessing constant variance assumption, as the observations with a residual value > 3 seems to be fewer compared to the previous plot, therefore showing an even strong confinement to the (-2,2) range. 
+
+```{r model4 normality assumption}
+par(mfrow=c(1,2))
+hist(resids4,xlab='Residuals',main="Histogram for Residuals")
+qqPlot(resids4,ylab='Residuals',main="QQ Plot for Residuals")
+```
+Comparing our results from before, we can see that normality assumption now holds for model4, as the skewness as been significantly reduced in the histogram and we don't see a significant number of observations outside the tail of our QQplot compared to before. 
+
+We can say that model4 holds all assumptions.
+
+# Question 8: Model Comparison  [3pts]
+
+**(a) Using each model summary, compare and discuss the R-squared and Adjusted R-squared of model2, model3, and model4.**
+```{r}
+par(mfrow=c(1,3))
+summary(model2)
+summary(model3)
+summary(model4)
+```
+Based on our results, we can see that Model4 has the best performance, with an Adjusted R2 of 0.9808. Following model2 with 0.9335 and the last model3 with 0.9321. However, notice that there's only a 0.014 difference between model2 and model3's performance. 
+
+We can see that when removing the correlated variables, there doesn't seem to be a significant difference in the model performance. Meaning that a majority of the variance in Weight can be explained by the Species and Total Length variable. The boxcox transformation also seemed to improve the distribution of our data in order for the normality assumption to hold, which lead to a significant uptake in the model performance. 
+
+# Question 9: Estimation and Prediction [10 points]
+
+**(a) Estimate Weight for the last 10 rows of data (fishtest) using both model3 and model4.  Compare and discuss the mean squared prediction error (MSPE) of both models.**
+
+```{r prediction for testdata}
+pred_model3 <- predict(model3, fishtest)
+pred_model4 <- predict(model4, fishtest)
+mean((fishtest$Weight - pred_model3) ^ 2)
+mean((fishtest$Weight - pred_model4^2) ^ 2)
+```
+Based on our results, because we applied a sqrt to the response variable to model4, we need to make sure we reverse this operation by squaring the prediction results. This will then provide a result at the same level of units as the Weight variable. 
+
+When we compare the two results, we can see that Model4 performs significantly better with a smaller MSPE score of 2442.9 compared to model3 of 9392.25. 
+
+
+**(b) Suppose you have found a Perch fish with a Body.Height of 28 cm, and a Total.Length of 32 cm. Using model4, predict the weight on this fish with a 90% prediction interval.  Provide an interpretation of the prediction interval.**
+
+```{r}
+# Code to predict point and prediction interval...
+fishtest2 <- fishtest[1,]
+fishtest2['Species']='Perch'
+fishtest2['Body.Height']=28
+fishtest2['Total.Length']=32
+
+predict(model4, fishtest2, interval="prediction",level = 0.90)^2
+```
+Based on our results, when we square the result of our fitted value, we retrieve a fitted value of 461.94 for the weight with a lower bound of 374 and an upperbound of 558 for the prediction interval at 0.9 level. 

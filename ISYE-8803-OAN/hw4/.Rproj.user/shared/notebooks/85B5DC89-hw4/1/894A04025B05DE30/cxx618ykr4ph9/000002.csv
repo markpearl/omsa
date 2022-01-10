@@ -1,0 +1,8 @@
+"0","# Elastic"
+"0","y_elastic = predict(elastic, as.matrix(X_train), s = lambda_elastic)"
+"0","mse_elastic = sum((y_test-y_elastic)^2)/nrow(X_test)"
+"0","mse_elastic"
+"1","[1]"
+"1"," 0.1985702"
+"1","
+"

@@ -1,0 +1,1 @@
+"0","plot(c(1:length(alpha_seq)),lambda_min_list,type = ""l"",ylab = 'Lambda Values',xlab='X sequence (1 to 90)',main = 'Lambda Plots for Elastic Net')"

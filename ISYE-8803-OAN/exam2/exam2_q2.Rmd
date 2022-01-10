@@ -1,0 +1,194 @@
+---
+title: "exam2"
+author: "Mark Pearl"
+date: "7/28/2021"
+output: html_document
+---
+```{r setup}
+library(glmnet)
+library(fastDummies)
+library(dplyr)
+library(grpreg)
+```
+
+```{r read data and split into train/test}
+students <- read.csv('./student.csv')
+students$Parents_Education <- students$Medu + students$Fedu
+students$Alcohol_Consumption <- students$Dalc + students$Walc 
+
+students_dummies <-data.frame(students)
+
+dummy_vars_df <- as.data.frame(list(sapply(students_dummies, class)),col.names = 'type')
+#Set the index to a new column called column_name
+dummy_vars_df  <- cbind(column_name = rownames(dummy_vars_df), dummy_vars_df)
+rownames(dummy_vars_df) <- 1:nrow(dummy_vars_df)
+dummy_vars_df <- dummy_vars_df %>% filter(!column_name %in% c("absences","G1","G2","G3","Parents_Education","Alcohol_Consumption"))
+
+for (row in 1:nrow(dummy_vars_df)) {
+  #Iterate over all the rows and create dummy variables
+  students_dummies <- dummy_cols(students_dummies, select_columns = dummy_vars_df[row,'column_name'])
+  students_dummies = students_dummies[,!(names(students_dummies) %in% dummy_vars_df[row,'column_name'])]
+}
+
+drop <- c("Parents_Education","Alcohol_Consumption")
+students_dummies = students_dummies[,!(names(students_dummies) %in% drop)]
+
+#Split data into train and test
+dt = sort(sample(nrow(students_dummies), nrow(students_dummies)*.8))
+train<-students_dummies[dt,]
+train_y <- train$G3
+train_x <- train[ ,!(colnames(train) == "G3")]
+test<-students_dummies[-dt,]
+test_y <- test$G3
+test_x <- test[ ,!(colnames(test) == "G3")]
+```
+
+```{r lasso regression}
+mod <- cv.glmnet(x = as.matrix(train_x),y = train_y, family = "gaussian",alpha = 1, nfolds=10)
+lambda_lasso = mod$lambda.min
+lasso_final = glmnet(x = as.matrix(train_x),y = train_y, family = "gaussian",alpha = 1,lambda=lambda_lasso)
+lasso_final$beta
+```
+```{r q2 lasso predict}
+# Lasso prediction / mse results
+y_lasso = predict(lasso_final, as.matrix(test_x), s = lambda_lasso)
+mse_lasso = sum((test_y-y_lasso)^2)/nrow(test_x)
+mse_lasso
+```
+```{r q2 group variables}
+# Lasso prediction / mse results
+train_x_group <- train_x[,-(grep(paste0("other","$"),colnames(train_x),perl= TRUE))]
+test_x_group <- test_x[,-(grep(paste0("other","$"),colnames(test_x),perl= TRUE))]
+
+#Create group vector for group lasso
+group_vars_df <- as.data.frame(list(sapply(train_x_group, class)),col.names = 'type')
+#Set the index to a new column called column_name
+group_vars_df  <- cbind(column_name = rownames(group_vars_df), group_vars_df)
+rownames(group_vars_df) <- 1:nrow(group_vars_df)
+group_vars_df
+```
+
+```{r create dataframe}
+column_name_prefixes <- rep(NA, nrow(group_vars_df))
+
+for (row in 1:nrow(group_vars_df)) {
+  #Iterate over all the rows and create dummy variables
+  column_name_prefixes[row]=strsplit(group_vars_df[row,'column_name'],"_")[[1]][1]
+}
+
+#Get the unique elements of the list
+unique_prefixes <- unique(column_name_prefixes)
+mapping_list <- seq(1:length(unique_prefixes))
+group_factor <- rep(NA, length(column_name_prefixes))
+
+#Create group_factor list
+i<-1
+for (elem in column_name_prefixes) {
+  group_factor[i]=which(unique_prefixes %in% elem)
+  i <- i+1
+} 
+```
+
+```{r group lasso regression}
+glasso = cv.grpreg(as.matrix(train_x_group),as.vector(train_y),group_factor)
+```
+
+
+
+```{r store optimal lambda from cv group lasso}
+glasso_lambda <- min(glasso$lambda)
+which(glasso$fit$beta[,glasso$min]==0)
+```
+
+
+```{r prediction / mse results group lasso}
+y_pred_glasso <- predict(glasso,as.matrix(test_x_group),lambda=glasso_lambda)
+mse_glasso = sum((test_y-y_pred_glasso)^2)/length(y_pred_glasso)
+mse_glasso
+```
+```{r summary glasso}
+summary(glasso)
+glasso$fit$beta
+```
+
+```{r glass grouping part d}
+#Create single feature for parents education
+Alcohol_Consumption <- students$Alcohol_Consumption
+Parents_Education <- students$Parents_Education
+
+students_dummies_final = cbind(students_dummies,Alcohol_Consumption,Parents_Education)
+students_dummies_final <- dummy_cols(students_dummies_final, select_columns = "Alcohol_Consumption")
+students_dummies_final <- dummy_cols(students_dummies_final, select_columns = "Parents_Education")
+```
+
+```{r drop columns}
+####NEEDED TO RESTART R RESSION AND RUN EACH OF THESE COMMANDS IN THE CONSOLE FOR IT TO WORK
+###I BELIEVE IT"S BECAUSE OF THE PACKAGE ORDER DEFINED AT THE BEGINNING
+
+#Drop columns that end with _no, since yes_ factor already contains inherit grouping for the binary variable
+library(dplyr)
+students_dummies_final  <- select(students_dummies_final, -contains("Medu"))
+students_dummies_final  <- select(students_dummies_final, -contains("Fedu"))
+students_dummies_final  <- select(students_dummies_final, -contains("Dalc"))
+students_dummies_final  <- select(students_dummies_final, -contains("Walc"))
+#students_dummies_final  <- select(students_dummies, -contains("_no"))
+```
+
+``` {r split data and run final glasso}
+#Split data into train and test
+dt = sort(sample(nrow(students_dummies_final), nrow(students_dummies_final)*.8))
+train<-students_dummies_final[dt,]
+train_y_final <- train$G3
+train_x_final <- train[ ,!(colnames(train) == "G3")]
+test<-students_dummies_final[-dt,]
+test_y_final <- test$G3
+test_x_final <- test[ ,!(colnames(test) == "G3")]
+
+
+#Create group vector for group lasso
+group_vars_df_final <- as.data.frame(list(sapply(train_x_final, class)),col.names = 'type')
+#Set the index to a new column called column_name
+group_vars_df_final  <- cbind(column_name = rownames(group_vars_df_final), group_vars_df_final)
+rownames(group_vars_df_final) <- 1:nrow(group_vars_df_final)
+
+
+column_name_prefixes_final <- rep(NA, nrow(group_vars_df_final))
+
+for (row in 1:nrow(group_vars_df_final)) {
+  #Iterate over all the rows and create dummy variables
+  column_name_prefixes_final[row]=strsplit(group_vars_df_final[row,'column_name'],"_")[[1]][1]
+}
+
+#Get the unique elements of the list
+unique_prefixes <- unique(column_name_prefixes_final)
+mapping_list <- seq(1:length(unique_prefixes))
+group_factor_final <- rep(NA, length(column_name_prefixes_final))
+
+#Create group_factor list
+i<-1
+for (elem in column_name_prefixes_final) {
+  group_factor_final[i]=which(unique_prefixes %in% elem)
+  i <- i+1
+}
+```
+
+```{r group lasso regression final grouping}
+glasso_final = cv.grpreg(as.matrix(train_x_final),as.vector(train_y_final),group_factor_final)
+```
+
+```{r store optimal lambda from cv group lasso}
+glasso_lambda <- min(glasso_final$lambda)
+which(glasso_final$fit$beta[,glasso_final$min]==0)
+```
+
+```{r prediction / mse results group lasso}
+y_pred_glasso_final <- predict(glasso_final,as.matrix(test_x_final),lambda=glasso_lambda)
+mse_glasso_final = sum((test_y_final-y_pred_glasso_final)^2)/length(y_pred_glasso_final)
+mse_glasso_final
+```
+
+```{r summary glasso}
+summary(glasso_final)
+glasso$fit$beta
+glasso_final
+```

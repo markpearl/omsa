@@ -1,0 +1,8 @@
+"0","#layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))"
+"0","U=225"
+"0","L=25"
+"0","s=50"
+"0","shifted_image=horse_grayscale_rescaled+50"
+"0","shifted_image[horse_grayscale_rescaled>U-s] = U"
+"0","shifted_image[horse_grayscale_rescaled<L-s] = L"
+"0","plot(shifted_image, main='Plot shift with S=50')"

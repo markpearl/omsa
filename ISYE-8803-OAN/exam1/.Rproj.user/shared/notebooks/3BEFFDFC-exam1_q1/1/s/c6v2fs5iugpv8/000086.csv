@@ -1,0 +1,4 @@
+"0","S = smooth.spline(y, df = k+1, spar = spar)"
+"0","yhat = S$y"
+"0",""
+"0","plot(y,type = ""l"",width=5,lwd=4)"

@@ -1,0 +1,520 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
+options(tinytex.verbose = TRUE)
+```
+
+## Instructions
+
+This R Markdown file includes the questions, the empty code chunk sections for your code, and the text blocks for your responses.  Answer the questions below by completing this R Markdown file. You must answer the questions using this file. You can change the format from pdf to Word or html and make other slight adjustments to get the file to knit but otherwise keep the formatting the same. Once you've finished answering the questions, submit your responses in a single knitted file (just like the homework peer assessments).
+
+There are 16 questions divided among 5 sections, each worth 2-8 points. Partial credit may be given if your code is correct but your conclusion is incorrect or vice versa.
+
+*Next Steps:*
+
+1.  Save this .Rmd file in your R working directory - the same directory where you will download the heart_failure.csv data file into. Having both files in the same directory will help in reading the .csv file.
+
+2.  Read the question and create the R code necessary within the code chunk section immediately below each question. Knitting this file will generate the output and insert it into the section below the code chunk. 
+
+3.  Type your answer to the questions in the text block provided immediately after the question prompt: **This is how the question prompt will be formatted**. 
+
+4.  Once you've finished answering all questions, knit this file and submit the knitted file on Canvas.
+
+
+*Example Question Format:*
+
+(8a) This will be the exam question - each question is already copied from Canvas and inserted into individual text blocks below, *you do not need to copy/paste the questions from the online Canvas exam.*
+
+```{r}
+# Example code chunk area. Enter your code below the comment and between the ```{r} and ```
+
+
+```
+
+**Response to question (8a)**
+**Example prompt for the question being asked:** This is the section where you type your written answers to the question. Depending on the question asked, your typed response may be a number, a list of variables, a few sentences, or a combination of these elements. 
+
+
+** Ready? Let's begin. We wish you the best of luck! **
+
+
+## Final Exam Part 2 - Data Set Background 
+
+For this exam, you will be building a model to predict whether a heart failure patient will die during their follow-up period based on their characteristics.
+
+The heart_failure.csv data set consists of the following 13 variables:
+
+1. age: age of patient in years (integer)
+
+2. anemia: was there a decrease in RBC/hemoglobin (1 = yes or 0 = no) (binary)
+
+3. high blood pressure: does the patient have hypertension (1 = yes or 0 = no) (binary)
+
+4. creatinine phosphokinase: CPK level in mgc/L (integer)
+
+5. diabetes: does the patient have diabetes (1 = yes or 0 = no) (binary)
+
+6. ejection fraction: percent of blood leaving (integer)
+
+7. platelets: number of platelets in kiloplatelets/mL (integer)
+
+8. sex: is the patient female (0) or male (1) (binary)
+
+9. serum creatinine: ceratinine level in mg/dL (numeric)
+
+10. serum sodium: sodium level in mEq/L (integer)
+
+11. smoking: does the patient smoke (1 = yes or 0 = no) (binary)
+
+12. time: follow-up period in days (integer)
+
+13. death event: did the patient die during the follow-up period (1 = yes or 0 = no) (binary)
+
+Read the data and answer the questions below. Assume a significance level of 0.05 for hypothesis tests.
+
+## Read Data
+
+```{r}
+# Load relevant libraries (add here if needed)
+library(car)
+library(CombMSC)
+library(aod)
+library(bestglm)
+library(boot)
+library(glmnet)
+
+# Ensure that the sampling type is correct
+RNGkind(sample.kind="Rejection")
+
+# Set seed 
+set.seed(0)
+
+# Read the data
+dataFull = read.csv("heart_failure.csv", header=TRUE)
+
+# Split data for traIning and testing
+testRows = sample(nrow(dataFull), 0.2*nrow(dataFull))
+dataTest = dataFull[testRows, ]
+dataTrain = dataFull[-testRows, ]
+```
+
+**Note:** Use *dataTrain* as your dataset for the following questions unless otherwise stated.
+
+**Note:** All the categorical variables in the dataset only take on two levels, and the categories are already coded as 0's and 1's. *Please don't change the data types of the variables.*
+
+## Question 1: Exploratory Analysis
+
+(1a) 3pts - Create a side-by-side boxplot for the variable *ejection_fraction* versus *death_event*. Does *ejection_fraction* appear useful in predicting whether a heart failure patient will die during their follow-up period? Include your reasoning.
+
+```{r}
+# Code to create plot
+boxplot(dataTrain$ejection_fraction~dataTrain$death_event,xlab="ejection_fraction", ylab="death_event")
+```
+
+**Response to question (1a)**:
+
+**Interpretation:** 
+Based on our results we can see that there is a few outlier observations outside the 1st and 3rd quantiles, but not enough to cause a significant effect, we have method like Cook's distance to be able to mitigate the potential effects and determine if they're actually influential points. 
+
+Most importantly, we can see that there is a difference between the median results for the ejection_fraction variable, which means it could be a valuable predictor for the death_event response variable.
+
+
+(1b) 3pts - Create a scatterplot matrix and a correlation table that includes the following seven quantitative variables: *age*, *creatinine_phosphokinase*, *ejection_fraction*, *platelets*, *serum_creatinine*, *serum_sodium*, and *time*. Does there appear to be correlation among these seven variables? Will these potentially suggest multicollinearity? Include your reasoning. 
+
+
+```{r,message=F,warning=F}
+# Code to create plot
+par(mfrow=c(3,3))
+plot(death_event~age, data=dataTrain, main="age vs. Death Event", col="blue", pch = 16)
+plot(death_event~creatinine_phosphokinase, data=dataTrain, main="creatinine_phosphokinase vs. Death Event", col="blue", pch = 16)
+plot(death_event~ejection_fraction, data=dataTrain, main="ejection_fraction vs. Death Event", col="blue", pch = 16)
+plot(death_event~platelets, data=dataTrain, main="platelets vs. Death Event", col="blue", pch = 16)
+plot(death_event~serum_creatinine, data=dataTrain, main="serum_creatinine vs. Death Event", col="blue", pch = 16)
+plot(death_event~serum_sodium, data=dataTrain, main="serum_sodium vs. Death Event", col="blue", pch = 16)
+plot(death_event~time, data=dataTrain, main="time vs. Death Event", col="blue", pch = 16)
+
+```
+
+```{r,message=F,warning=F}
+# Code to create correlation table
+as.matrix(cor(dataTrain[c("age","creatinine_phosphokinase","ejection_fraction","platelets","serum_creatinine","serum_sodium","time")]))
+```
+
+**Response to question (1b)**: 
+
+**Interpretation:** 
+
+Based on the results we can see that there does not seem to be a problem of correlation between our variables as a majority of our values have a | correlation score | < 0.3 for each of the predictor combinations. We can further using the VIF (Variance Inflation Factor) to get a more precise result, however based on this matrix we're not seeing any signs of heavy correlation. 
+
+From you the result of our scatterplot, we can see that the each dependent variable seems to be well spread out and do not seem to form any groups or clustering. We do see potential outliers though in the two creatinine variables. 
+
+## Question 2: Full Model
+
+(2a) 2pts - Fit a logistic regression model with *death_event* as the response variable and all other variables as predicting variables. Include an intercept. Call it *model1*. Display the summary table for the model. 
+
+```{r}
+# Code to fit model and display summary
+model1 <- glm(death_event~.,data=dataTrain)
+summary(model1)
+```
+
+
+(2b) 3pts - Evaluate the overall regression for *model1*. Use an alpha level of 0.05. What do you conclude? Include your reasoning.
+
+```{r,message=F,warning=F}
+# Code for overall regression test. P-value must be displayed
+1-pchisq((model1$null.dev - model1$deviance),
+(model1$df.null - model1$df.resid))
+```
+
+**Response to question (2b)**: 
+
+**Interpretation** 
+Based on our results we can see that the p-value obtained is less than our alpha level of 0.05, indicating that the model is significant overall.
+
+
+(2c) 3pts - Conduct a multicollinearity test on *model1*. Using a VIF threshold of 10, what can you conclude? Is your conclusion consistent with your observations from question (1b)?
+
+```{r}
+# Code to conduct multicollinearity test
+cat("VIF Threshold:", max(10, 1/(1-summary(model1)$r.squared)), "\n")
+```
+
+```{r}
+vif(model1)
+```
+
+**Response to question (2c)**: 
+
+**Interpretation**
+Based on our results, we can see that the VIF factor for each variable is less than the threshold of 10. Meaning we are not experiencing multicollinearity in our model. This matches up with the results we saw in our correlation matrix as part of question 1b.
+
+## Question 3: Variable Selection
+
+(3a) 3pts - Conduct a complete search to find the submodel with the smallest BIC. Fit this model. Include an intercept. Call it *model2*. Display the summary table for the model. *Note: Remember to set family to binomial.* Which variables are in your *model2*? 
+
+```{r}
+# Code to conduct exhaustive search
+regsub = regsubsets(x=as.matrix(dataTrain[-13]),y=dataTrain$death_event,nbest=1,nvmaz=4096,method="exhaustive")
+summary_regsub = summary(regsub)
+as.matrix(cbind(summary_regsub$which,summary_regsub$bic))
+```
+To find the best submodel we're going to use the regsubets command so that we can perform an exhaustive search to determine the best model. Since we have 12 predicting variables, our nvmax variables will be set to 2^12 = 4096, as the option used to determine how many submodels we're going to search through, the nbest option will provide back number of subsets of each size to record, in our case 1. 
+
+The results show us that the model with the lowest BIC score is the 4th row, which provides back a BIC score of -109.42701. 
+
+```{r}
+# Code to conduct exhaustive search
+summary_regsub$which[4,]
+```
+
+```{r}
+# Code to conduct exhaustive search
+model2 = glm(death_event~age+ejection_fraction+serum_creatinine+smoking+time,data=dataTrain)
+summary(model2)
+```
+**Responses to question (3a)**
+
+**Variables selected:** 
+Based on our results explained above, the variables used for model2 are the following:
+Age, Ejection_fraction, Serum_creatinine, Smoking and Time
+
+
+(3b) 3pts - Conduct forward-backward stepwise regression using AIC. Allow the minimum model to be the model with only an intercept, and the full model to be *model1*. Call it *model3*. Display the summary table for the model. Which variables are in your *model3*? 
+
+```{r}
+#  Code to conduct stepwise regression 
+set.seed(100)
+# Create the minimum model
+minmod = lm(death_event~1, data = dataTrain)
+# Step Forward from the minimum model using AIC as the complexity penalty
+model3 = step(model1, scope = list(lower = minmod, upper = model1),
+direction = "both", k=2, trace=F)
+# Show the optimal model
+summary(model3)
+```
+
+**Responses to question (3b)**:
+
+**Variables selected:** 
+Based on the specification of forward-backward in the question, we will set the direction to both. Meaning it will conduct forward and backward stepwise regression at the same time.
+
+Based on our summary output of our model, we can see that the variables selected from the optimal model are: age, creatinine_phosphokinase, ejection_fraction, serum_creatinine and time.
+
+(3c) 8pts - Conduct Lasso regression on the train data set (*dataTrain*). Use *death_event* as the response, and all other variables as the predicting variables. Use 10-fold cross validation on the *classification error* to select the optimal lambda value.
+
+(3c.1) What is the optimal lambda value?
+
+(3c.2) Display the estimated coefficients at the optimal lambda value.
+
+(3c.3) Which variables were selected?
+
+(3c.4) Plot the paths of the lasso coefficients. Which variable entered the model first?
+
+(3c.5) Fit a logistic regression model with *death_event* as the response variable and the variables selected from lasso regression as predicting variables. Include an intercept. Call it *model4*. Display the summary table for the model.
+
+```{r,message=F,warning=F}
+# Setting the seed (please do not change)
+set.seed(0)
+
+# Code to conduct 10-fold CV and find optimal lambda
+cv.lasso = cv.glmnet(as.matrix(dataTrain[,-13]), dataTrain[,13],
+family='gaussian', alpha=1, nfolds=10)
+cat("CV Optimized lambda:\n")
+cat(c(cv.lasso$lambda.min,"\n"))
+
+# Display coefficients at optimal lambda (do not output anything else)
+set.seed(100)
+lasso.mod = glmnet(as.matrix(dataTrain[,-13]), dataTrain[,13],
+family='gaussian', alpha=1)
+# Extract coefficents at optimal lambda
+cat("Coefficients at Optimal Lambda:\n")
+coef(lasso.mod, s = cv.lasso$lambda.min)
+```
+
+```{r,message=F,warning=F}
+# Plot of coefficent path 
+plot(lasso.mod,xvar="lambda",label=TRUE,lwd=2)
+abline(v=log(cv.lasso$lambda.min),col='black',lty = 2,lwd=2)
+```
+
+```{r,message=F,warning=F}
+# Code to fit model4 and display summary
+model4 <- glm(death_event ~ age + creatinine_phosphokinase + ejection_fraction + serum_creatinine + time,data=dataTrain)
+summary(model4)
+```
+
+**Responses to question (3c)**
+
+**(3c.1) Optimal lambda value:** 
+0.0179104287105811 
+**(3c.3) Variables selected:** 
+Same as model3, the age, creatinine_phosphokinase, ejection_fraction, serum_creatinine and time variables.
+
+**(3c.4) Variable that entered the model first?** 
+Based on our results of the coefficient paths, we can see that the time variable is the first to enter the model.
+
+## Question 4: Model Comparison and Prediction
+
+(4a) 3pts - Compare the AICs, and BICs of *model1*, *model2* and *model3*. Which model is preferred based on these criteria and why?
+
+```{r}
+# Code to calculate AICs and BICs
+set.seed(100)
+n = length(dataTrain$death_event)
+comp = rbind(Model1=
+               c(AIC(model1,k=2), AIC(model1,k=log(n))),
+
+             Model2=c(AIC(model2,k=2), AIC(model2,k=log(n))),
+             
+             Model3=c(AIC(model3,k=2), AIC(model3,k=log(n))))
+colnames(comp) = c("AIC", "BIC")
+comp
+```
+**Response to question (4a)**
+
+**Interpretation:** 
+Based on the above output, we can see that Model3 is the preferred model because it contains the lowest AIC and BIC when compared to model1 and model2.
+
+
+(4b) 4pts - Using *model2*, and *model3*, give a binary classification to each of the test rows in *dataTest*, with 1 indicating a heart failure patient dying during their follow-up period. Use 0.5 as your classification threshold. What is the classification error rate over these data points for each model? 
+
+```{r}
+# Code to estimate binary classification and classification error rate for model2
+set.seed(100)
+
+cost0.5 = function(y, pi){
+ ypred=rep(0,length(y))
+ ypred[pi>0.5] = 1
+ err = mean(abs(y-ypred))
+ return(err)
+}
+
+## classification error for 10-fold cross-validation
+cv.err_model2 = cv.glm(dataTest,model2,cost=cost0.5, K=10)$delta[1]
+cr.err_model3 = cv.glm(dataTest,model3,cost=cost0.5, K=10)$delta[1]
+cv.err_model2
+cr.err_model3
+```
+
+**Response to question (4b)**
+
+**Model2 classification error rate:** 
+0.6101695
+
+**Model3 classification error rate:** 
+0.5932203
+
+
+(4c) 4pts - Using *model2* only, provide the prediction accuracy rates for the test data *dataTest* using the following classification thresholds: 0.3, 0.4, 0.5, 0.6, 0.7.  
+
+(4c.1) Provide a plot of the thresholds versus the prediction accuracy rates. 
+
+(4c.2) Which threshold(s) result(s) in the highest prediction accuracy rate(s)?
+
+
+```{r}
+# Code for calculating prediction accuracy rates for different thresholds
+cost0.3 = function(y, pi){
+ ypred=rep(0,length(y))
+ ypred[pi>0.3] = 1
+ err = mean(abs(y-ypred))
+ return(err)
+}
+
+cost0.4 = function(y, pi){
+ ypred=rep(0,length(y))
+ ypred[pi>0.4] = 1
+ err = mean(abs(y-ypred))
+ return(err)
+}
+
+cost0.6 = function(y, pi){
+ ypred=rep(0,length(y))
+ ypred[pi>0.6] = 1
+ err = mean(abs(y-ypred))
+ return(err)
+}
+cost0.7 = function(y, pi){
+ ypred=rep(0,length(y))
+ ypred[pi>0.7] = 1
+ err = mean(abs(y-ypred))
+ return(err)
+}
+
+## Prediction given a set of new observations
+pred_model2 = predict.glm(model2,dataTest[-13],type="response")
+pred_model3 = predict.glm(model3,dataTest[-13],type="response")
+
+err0.3 = cost0.3(dataTest$death_event,pred_model2)
+err0.4 = cost0.4(dataTest$death_event,pred_model2)
+err0.5 = cost0.5(dataTest$death_event,pred_model2)
+err0.6 = cost0.6(dataTest$death_event,pred_model2)
+err0.7 = cost0.7(dataTest$death_event,pred_model2)
+err_model2 = c(err0.3,err0.4,err0.5,err0.6,err0.7)
+
+err0.3_1 = cost0.3(dataTest$death_event,pred_model3)
+err0.4_1 = cost0.4(dataTest$death_event,pred_model3)
+err0.5_1 = cost0.5(dataTest$death_event,pred_model3)
+err0.6_1 = cost0.6(dataTest$death_event,pred_model3)
+err0.7_1 = cost0.7(dataTest$death_event,pred_model3)
+err_model3 = c(err0.3_1,err0.4_1,err0.5_1,err0.6_1,err0.7_1)
+
+
+
+# Plot of the classification threshold vs. prediction accuracy rates.
+par(mfrow=c(1,2))
+plot(c(0.3,0.4,0.5,0.6,0.7),err_model2,
+     type="l",lwd=3,xlab="Threshold",ylab="Classification Error Model2")
+plot(c(0.3,0.4,0.5,0.6,0.7),err_model3,
+     type="l",lwd=3,xlab="Threshold",ylab="Classification Error Model3")
+```
+
+**Responses to question (4c)**
+
+**Threshold(s) with the highest prediction accuracy rate(s):** 
+
+From our results we can see that model2 has the best prediction accuracy for either a threshold value of 0.4 or 0.5
+and model3 has the highest prediction accuracy at a thresold = 0.5
+
+## Question 5: Goodness of fit
+
+For residual analysis, we need replications. We will provide the code for you to aggregate the data across the variables *anaemia*, *diabetes*, *high_blood_pressure*, *sex*, and *smoking*. 
+
+```{r}
+# Aggregate data and display new model summary
+data.agg.n = aggregate(death_event~anaemia+diabetes+high_blood_pressure+sex+smoking,
+                       data=dataTrain,FUN=length)
+data.agg.y = aggregate(death_event~anaemia+diabetes+high_blood_pressure+sex+smoking,
+                       data=dataTrain,FUN=sum)
+data.agg = cbind(data.agg.y,total=data.agg.n$death_event)
+head(data.agg,1)
+```
+
+(5a) 2pts -  Fit a logistic regression model with this aggregated data called *model5*. Use all five predicting variables. Include an intercept. Remember the replications. Display the summary table for the model.
+
+```{r}
+# Code for fitting the model here
+model5 <- glm(data.agg,family="binomial")
+summary(model5)
+```
+
+(5b) 3pts - Using model5, conduct a goodness-of-fit hypothesis test using the Pearson residuals. What do you conclude at the alpha level of 0.05? Explain.
+
+```{r}
+# Code for GOF test. P-value must be displayed
+# Pearson residuals test
+pResid <- resid(model5, type = "pearson")
+cat("Pearson residuals test p-value:",
+1-pchisq(sum(pResid^2), model5$df.residual))
+```
+
+**Response to question (5b)**
+
+**Interpretation:** 
+The p-values for the goodness of fit test > alpha 0.5, suggesting that we fail to reject the null hypothesis
+that the model is a good fit. 
+
+
+(5c) 2pts - Evaluate whether the deviance residuals are normally distributed by producing a QQ plot of the residuals. What assessment can you make about the goodness of fit of *model5* based on these plots?
+
+```{r}
+#All code needed for 5c
+res = resid(model5,type="deviance")
+
+# QQ-plot and Histogram
+par(mfrow=c(1,2))
+qqPlot(res, ylab="Deviance residuals")
+hist(res,10,xlab="Deviance residuals", main="")
+```
+
+**Response to question (5c)**
+
+**Interpretation:** 
+
+Based on our results, we see that the residuals clearly do not follow a normal distribution, as our deviance residuals more closely resemble a bimodal distribution.
+We can also see from the qq plot that our data does not follow closely to our center line, and is going in and out of the center line several times throughout the graph, further backing up histogram result.
+
+(5d) 2pts - Using *model5*, estimate the overdispersion parameter. What do you conclude?
+
+```{r}
+#All code needed for 5d 
+model5$deviance/model5$df.res
+```
+
+**Responses to question (5d)**
+
+**Overdispersion parameter:** 1.620745
+
+**Interpretation:**
+We can conclude that there is not overdispersion in our model. I believe we're not exhibiting this because it's been clearly shown throughout the model that we don't experience any multicollinearity, based on the results of our correlation plot and VIF calculation. This can cause overdispersion in addition to heterogenity in the success probablity that hasn't been modeled. 
+
+
+(5e) 2pts - Why might a logistic regression model not be a good fit? Provide two reasons. How can you try to improve the fit in each situation? *Note: This is a general question and is not related to question 5b.*
+
+**Responses to question (5e)**
+
+**Reason 1:** One reason may be that the link function used in our case (logit) simply may not fit our data well. 
+
+**How can you try to improve the fit?** 
+In our case the model may be improved by switching the link function that is used to fit the model such as changing the function from logit to cloglog. This may help reduce the deviance and leader to a better fitting model.
+
+**Reason 2:** A second reason we may be getting bad results is due to outlier / influential observations throughout each variable. 
+
+**How can you try to improve the fit?** 
+We can try and alleviate this by conducting a Cook's test on each of the impacted variables and removes outliers. After removing outliers and refitting the model, we can determine if this provides a better fit to our model.
+
+Providing 3rd reason.
+**Reason 2:** Another reason we might not be getting a food fit is that there's likely additional variables that we're excluding which could provide explanatory power against our death_event response variable.
+
+**How can you try to improve the fit?** 
+We can try and use different combinations of factor's by running a boxcox transformation on each variable to determine what transformation may be applied to improve against the assumptions (i.e. Linearity, Independence, Constant V, etc.). In addition we could also provide interaction terms to see if this also helps.
+
+**This is the End of Final Exam Part 2 **
+
+*We hope you enjoyed the course - and we wish you the best in your future coursework!*

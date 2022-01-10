@@ -1,0 +1,3 @@
+"0","horse_grayscale <- grayscale(horse_I)"
+"0","horse_bw <- threshold(horse_grayscale, thr = 0.5, approx = TRUE, adjust = 1)"
+"0","plot(horse_bw)"

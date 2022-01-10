@@ -1,0 +1,107 @@
+---
+title: "exam1_Q1"
+author: "Mark Pearl"
+date: "6/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Exam 1
+
+#Q1 Functional Data Analysis
+
+```{r lib and data imports}
+#Import the required libraries
+library(splines)
+library(tidyverse)
+library(R.matlab)
+
+nir_mat <- readMat('./Question1-2.mat')
+y_df <- data.frame(SOM=nir_mat$SOM)
+nir_df <- data.frame(NIR=nir_mat$NIR)
+                     #,SOM=nir_mat$SOM)
+nir_train <- nir_df[1:80,]
+nir_test <- nir_df[80:108,]
+y_train <- y_df[1:80,]
+y_test <- y_df[80:108,]
+nir_mean_df <- data.frame(mean=colMeans(nir_train))
+```
+
+## 1a
+
+You can also embed plots, for example:
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r 1a Use Smoothing Splines and GCV to compute the Mean}
+#Compute the b-spline basis matrix
+y <- nir_mean_df$mean
+x = seq(0,length(y),length.out = length(y))
+k <- 15
+n <- length(y)
+
+# Different lambda selection
+allspar = seq(0,1,length.out = 1000)
+p = length(allspar)
+RSS = rep(0,p)
+df = rep(0,p)
+for(i in 1:p)
+{
+  yhat = smooth.spline(nir_mean_df, df = k+1, spar = allspar[i])
+  df[i] = yhat$df
+  yhat = yhat$y
+  RSS[i] = sum((yhat-y)^2)
+}
+# GCV criterion 
+GCV = (RSS/n)/((1-df/n)^2)
+par(mfrow=c(1,2))
+plot(allspar,GCV,type = "l", lwd = 3)
+spar = allspar[which.min(GCV)]
+points(spar,GCV[which.min(GCV)],col = "red",lwd=5)
+S = smooth.spline(y, df = k+1, spar = spar)
+yhat = S$y
+
+plot(y,type = "l",width=5,lwd=4)
+lines(x,yhat,col = "red",lwd=1)
+```
+The optimal lambda is 0.1171171. 
+
+## 1b
+
+```{r 1b}
+library(glmnet)
+basis_matrix <- matrix(ncol=59,nrow=80)
+for (i in seq(1:80)){
+  s = smooth.spline(nir_train[,i], df = k+1, spar = spar)
+  basis_matrix[i,]= s$fit$coef
+}
+
+ridge <- glmnet(x=basis_matrix,y=y_train,alpha=0)
+predict(ridge,y_test)
+
+```
+
+```{r 2}
+library(fda)
+splinebasis = create.bspline.basis(c(0,1),28)
+x = seq(0,1,length=1050)
+smooth = smooth.basis(x,t(nir_df),splinebasis)
+plot(smooth)
+
+
+
+
+```
+
+```{r}
+Xfun = smooth$fd
+pca = pca.fd(Xfun, 10)
+var.pca = cumsum(pca$varprop)
+nharm = sum(var.pca < 0.95) + 1
+pc = pca.fd(Xfun, nharm)
+plot(pca$varprop, type='l')
+```
+Based on the results we can see that the 99% of variation is explained by the first 5 features. 

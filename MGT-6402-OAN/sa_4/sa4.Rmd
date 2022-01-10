@@ -1,0 +1,42 @@
+---
+title: "mgt-6203-sa4"
+author: "Mark Pearl"
+date: "3/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r factors, include=FALSE}
+factors <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/sa_4/factors.csv')
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+lm1 <- lm(Brk_exret ~ RF, data = factors)
+summary(lm1)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r pressure, echo=FALSE}
+lm2 <- lm(Brk_exret ~ Mkt_rf + SMB + HML, data = factors)
+summary(lm2)
+```
+```{r pressure, echo=FALSE}
+lm3 <- lm(Brk_exret ~ Mkt_rf + SMB + HML + Mom + BAB+ QMJ, data = factors)
+summary(lm3)
+```

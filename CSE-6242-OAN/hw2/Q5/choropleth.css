@@ -1,0 +1,14 @@
+#tooltip {
+    font-family: sans-serif;
+    color: #454545;
+}
+
+#gameDropDown {
+    max-width:90%;
+    margin-bottom: 20px;
+    margin-right: 35px;
+}
+
+h3, h5 {
+    margin: 0;
+}

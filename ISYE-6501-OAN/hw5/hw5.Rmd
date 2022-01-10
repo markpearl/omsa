@@ -1,0 +1,67 @@
+---
+title: "Homework 5-Regression"
+author: "Mark Pearl"
+date: "9/25/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## 8.1 Application for Regression in Real-Life
+
+Describe a situation or problem from your job, everyday life, current events, etc., for which a linear
+regression model would be appropriate. List some (up to 5) predictors that you might use.
+
+For a recent project at work for an NHL team, regression is heavily used for points production for each line. There are several categorical and continuous variables to account for such as historical point production, line rank (i.e 1st to 4th line), aggressivness, country of origin, etc. The response variable is the aggregated points across all players on a line or defensemen pairing.
+
+The data would be trained on the categorical attributes which remain static along with historical season results for each player. This is a great tool for understanding line combinations against other teams, and what-if-analysis to determine which players on a team should be paired up together to optimize the total results for the entire team.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r uscrime_data with sample}
+uscrime_data <- read.table('C:/Users/mjpearl/Desktop/omsa/ISYE-6501-OAN/hw5/data/uscrime.txt',header = TRUE, stringsAsFactors = FALSE)
+head(uscrime_data)
+```
+
+## 8.2 LM Model for US Crime Data
+The following plots will conduct exploratory analysis on the data to get a sense of the data's distribution for each variable. We will then use a simple linear regression approach using lm() to predict against the target variable for crime with the one row of data we've been provided for test data.
+
+```{r summary statistics}
+summary(uscrime_data)
+```
+There's potentially a few variables in this dataset such as Population which could require scaling or normalization. In addition, based on our last findings from a previous homework, it might be beneficial to remove outlier values towards the upper quartile.
+
+```{r scatterplot}
+## 75% of the sample size for the uscrime dataset
+pairs(~M+Po1+Po2+LF+M.F+Pop+Wealth+Ineq,data=uscrime_data,
+   main="Simple Scatterplot Matrix")
+```
+
+As we can see, there seems to be a positive correlation between Po1 and Po2 and a negative correlation between Wealth and Inequality. There are several approaches we can use to deal with these features. One approach through feature engineering would be to conduct PCA (Principal Component Analysis) on the correlated features to produce a net new feature which alleviates the co-linearity. Another approach is to use L1 or L2 regularization to penalize the weights of these features so that they don't impact the results of our response variable.
+
+```{r linear model fit}
+#Since we're using a specific row for the test dataset, we'll use the full output to train the model  
+lm.fit = lm(Crime ~ .,data = uscrime_data)
+summary(lm.fit)
+```
+Based on the output of our fitted model on the training data, we can see modest performance with an R-Sqaure of 0.78. This means that the model is able to fairly accomodate the dataset's variance. We also see that there's several features with large p-values indicating that they don't provide any predictive value. The p-value results could be distorted for several of the features which have high co-linearity or due to overfitting. In a future test we will try and remove some features to assess the impact. 
+
+```{r run predict function}
+test <- data.frame(M = 14.0, So = 0, Ed = 10.0, Po1 = 12.0, Po2 = 15.5, LF = 0.640, M.F = 94.0, Pop = 150, NW = 1.1, U1 = 0.120, U2 = 3.6, Wealth = 3200, Ineq = 20.1, Prob = 0.04, Time = 39.0)
+lm_predict <- predict(lm.fit, test)
+lm_predict
+```
+We can see with the predict function that are value doesn't fall within the range of values for the Crime variable in the training dataset, however since we haven't split our test dataset from the original data, we don't have a way of measure it's accuracy. We would be able to calculate the MSE or RMSE if we were using test data from the original dataset.  
+
+Now let's try and re-run the fit with the Po2 and Wealth variables removed from the training dataset. 
+
+```{r linear model fit for 2nd result}
+drops <- c("Po2","Wealth")
+train <- uscrime_data[ , !(names(uscrime_data) %in% drops)]
+lm.fit2 = lm(Crime ~ .,data = train)
+summary(lm.fit2)
+```
+Based on the updated plot, we can see this did improve the standard error for the residuals. However, we don't notice a significant improvement for the R2 score and a worse F-statistics measure. This is the result of overfitting, which makes sense since we have such few observations in our training dataset.

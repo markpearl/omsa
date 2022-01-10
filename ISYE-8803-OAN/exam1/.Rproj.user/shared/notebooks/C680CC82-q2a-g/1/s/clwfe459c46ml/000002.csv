@@ -1,0 +1,4 @@
+"0","K <- array(0, dim=c(3,3,1))"
+"0","K[,,1] <- matrix(c(-1,-1,-1, -1,9,-1, -1,-1,-1), nrow = 3, ncol = 3)"
+"0","Yk <- filter2(horse_im,K[,,1])"
+"0","plot(Yk)"

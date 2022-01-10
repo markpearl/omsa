@@ -1,0 +1,294 @@
+---
+title: "q3"
+author: "Mark Pearl"
+date: "6/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r tensor decomp}
+library(rTensor)
+library(R.matlab)
+
+rm(list = ls())
+T1 <- readMat('heatT.mat')$T1$data
+T2 <- readMat('heatT.mat')$T2$data
+T3 <- readMat('heatT.mat')$T3$data
+tensor_list = list(T1,T2,T3)
+
+#for (tensor in tensor_list) {
+#T1 <- readMat('heatT.mat')[tensor]$data
+X <- as.tensor(T1) ## read the MATLAB generated Heat transfer data
+### CP Decomposition
+## min(IJ,JK,IK) = 21*10 = 210
+#X1 <- k_unfold(X,1)
+err <- rep(0,10)
+AIC <- rep(0,10)
+for (i in 1:10){
+  P <- cp(X, num_components = i, max_iter = 50, tol = 1e-05)
+  DD <- as.tensor(P$est@data)
+  err[i] <- fnorm(X - DD)^2
+  AIC[i] <- 2*err[i] + 2*i
+}
+Min <- which.min(AIC)
+Min
+#plot(AIC,type="l",main="Tucker Decomposition AIC",xlab="Rank Values",ylab="AIC")
+AIC
+min(AIC)
+
+P <- cp(X, num_components = Min , max_iter = 50, tol = 1e-05)
+# We need to sort lamdas in descending order
+lambdas <- P$lambdas
+index <- order(lambdas, decreasing = TRUE)
+lambdas <- lambdas[index]
+A <- P$U[[1]][,index]
+B <- P$U[[2]][,index]
+C <- P$U[[3]][,index]
+#dev.off()
+matplot(C,type="l",main="",xlab="",ylab="")
+par(mar=c(1,1,1,1))
+#par(mfrow=c(1,2))
+par(mfrow=c(1,Min))
+for (i in 1:Min){
+  XY <- kronecker(A[,i],t(B[,i]))*lambdas[i]
+  image(XY)
+}
+```
+```{r tensor decomp}
+library(rTensor)
+library(R.matlab)
+
+rm(list = ls())
+T1 <- readMat('heatT.mat')$T1$data
+T2 <- readMat('heatT.mat')$T2$data
+T3 <- readMat('heatT.mat')$T3$data
+tensor_list = list(T1,T2,T3)
+
+#for (tensor in tensor_list) {
+#T1 <- readMat('heatT.mat')[tensor]$data
+X <- as.tensor(T2) ## read the MATLAB generated Heat transfer data
+### CP Decomposition
+## min(IJ,JK,IK) = 21*10 = 210
+#X1 <- k_unfold(X,1)
+err <- rep(0,10)
+AIC <- rep(0,10)
+for (i in 1:10){
+  P <- cp(X, num_components = i, max_iter = 50, tol = 1e-05)
+  DD <- as.tensor(P$est@data)
+  err[i] <- fnorm(X - DD)^2
+  AIC[i] <- 2*err[i] + 2*i
+}
+Min <- which.min(AIC)
+Min
+#plot(AIC,type="l",main="Tucker Decomposition AIC",xlab="Rank Values",ylab="AIC")
+AIC
+min(AIC)
+
+P <- cp(X, num_components = Min , max_iter = 50, tol = 1e-05)
+# We need to sort lamdas in descending order
+lambdas <- P$lambdas
+index <- order(lambdas, decreasing = TRUE)
+lambdas <- lambdas[index]
+A <- P$U[[1]][,index]
+B <- P$U[[2]][,index]
+C <- P$U[[3]][,index]
+#dev.off()
+matplot(C,type="l",main="",xlab="",ylab="")
+#par(mar=c(1,1,1,1))
+#par(mfrow=c(1,2))
+par(mfrow=c(1,Min))
+for (i in 1:Min){
+  XY <- kronecker(A[,i],t(B[,i]))*lambdas[i]
+  image(XY)
+}
+```
+```{r tensor decomp}
+library(rTensor)
+library(R.matlab)
+
+rm(list = ls())
+T1 <- readMat('heatT.mat')$T1$data
+T2 <- readMat('heatT.mat')$T2$data
+T3 <- readMat('heatT.mat')$T3$data
+tensor_list = list(T1,T2,T3)
+
+#for (tensor in tensor_list) {
+#T1 <- readMat('heatT.mat')[tensor]$data
+X <- as.tensor(T3) ## read the MATLAB generated Heat transfer data
+### CP Decomposition
+## min(IJ,JK,IK) = 21*10 = 210
+#X1 <- k_unfold(X,1)
+err <- rep(0,10)
+AIC <- rep(0,10)
+for (i in 1:10){
+  P <- cp(X, num_components = i, max_iter = 50, tol = 1e-05)
+  DD <- as.tensor(P$est@data)
+  err[i] <- fnorm(X - DD)^2
+  AIC[i] <- 2*err[i] + 2*i
+}
+Min <- which.min(AIC)
+Min
+#plot(AIC,type="l",main="Tucker Decomposition AIC",xlab="Rank Values",ylab="AIC")
+AIC
+min(AIC)
+
+P <- cp(X, num_components = Min , max_iter = 50, tol = 1e-05)
+# We need to sort lamdas in descending order
+lambdas <- P$lambdas
+index <- order(lambdas, decreasing = TRUE)
+lambdas <- lambdas[index]
+A <- P$U[[1]][,index]
+B <- P$U[[2]][,index]
+C <- P$U[[3]][,index]
+#dev.off()
+matplot(C,type="l",main="",xlab="",ylab="")
+par(mar=c(1,1,1,1))
+#par(mfrow=c(1,2))
+par(mfrow=c(1,Min))
+for (i in 1:Min){
+  XY <- kronecker(A[,i],t(B[,i]))*lambdas[i]
+  image(XY)
+}
+```
+
+```{r cp decomp}
+library(rTensor)
+library(R.matlab)
+
+rm(list = ls())
+T1 <- readMat('heatT.mat')$T1$data
+T2 <- readMat('heatT.mat')$T2$data
+T3 <- readMat('heatT.mat')$T3$data
+tensor_list = list(T1,T2,T3)
+
+#for (tensor in tensor_list) {
+#T1 <- readMat('heatT.mat')[tensor]$data
+X <- as.tensor(T1) ## read the MATLAB generated Heat transfer data
+### CP Decomposition
+## min(IJ,JK,IK) = 21*10 = 210
+#X1 <- k_unfold(X,1)
+err <- rep(0,64)
+dim(err) <- c(4,4,4)
+AIC <- rep(0,64)
+dim(AIC) <- c(4,4,4)
+for(i in 1:4){
+ for(j in 1:4){
+   for(k in 1:4){
+     T<- tucker(X, ranks =c(i,j,k), max_iter = 50, tol = 1e-05)
+     DD <- as.tensor(T$est@data)
+     err[i,j,k] <- fnorm(X - DD)^2
+     AIC[i,j,k] <- 2*err[i,j,k] + 2*(i+j+k)
+    }
+  }
+}
+#plot(AIC,type="l",main="Tucker Decomposition AIC",xlab="Rank Values",ylab="AIC")
+AIC
+min(AIC)
+```
+
+```{r cp decomp}
+library(rTensor)
+library(R.matlab)
+
+rm(list = ls())
+T1 <- readMat('heatT.mat')$T1$data
+T2 <- readMat('heatT.mat')$T2$data
+T3 <- readMat('heatT.mat')$T3$data
+tensor_list = list(T1,T2,T3)
+
+#for (tensor in tensor_list) {
+#T1 <- readMat('heatT.mat')[tensor]$data
+X1 <- as.tensor(T1) ## read the MATLAB generated Heat transfer data
+X2 <- as.tensor(T2)
+X3 <- as.tensor(T3)
+X1 <- k_unfold(X1,1)
+X2 <- k_unfold(X2,1)
+X3 <- k_unfold(X3,1)
+
+err1 <- rep(0,64)
+dim(err1) <- c(4,4,4)
+AIC1 <- rep(0,64)
+dim(AIC1) <- c(4,4,4)
+
+err2 <- rep(0,64)
+dim(err2) <- c(4,4,4)
+AIC2 <- rep(0,64)
+dim(AIC2) <- c(4,4,4)
+for(i in 1:4){
+ for(j in 1:4){
+   for(k in 1:4){
+     T<- tucker(X3, ranks =c(i,j,k), max_iter = 50, tol = 1e-05)
+     DD <- as.tensor(T$est@data)
+     err1[i,j,k] <- fnorm(X3 - X1)^2
+     AIC1[i,j,k] <- 2*err1[i,j,k] + 2*(i+j+k)
+     err2[i,j,k] <- fnorm(X3 - X2)^2
+     AIC2[i,j,k] <- 2*err1[i,j,k] + 2*(i+j+k)
+    }
+  }
+}
+#plot(AIC,type="l",main="Tucker Decomposition AIC",xlab="Rank Values",ylab="AIC")
+
+```
+
+```{r tensor decomp output}
+X <- as.tensor(T1) 
+T<- tucker(X, ranks =c(3,3,3), max_iter = 50, tol = 1e-07)
+A <- T$U[[1]]
+B <- T$U[[2]]
+C <- T$U[[3]]
+XY1 <- kronecker(A[,1],t(B[,1]))
+XY2 <- kronecker(A[,2],t(B[,2]))
+XY3 <- kronecker(A[,3],t(B[,3]))
+#dev.off()
+par(mfrow=c(2,2))
+par(mar = rep(2, 4))
+image(XY1)
+image(XY2)
+image(XY3)
+matplot(C,type="l",main="Tucker Decomposition Result T1",xlab="",ylab="")
+```
+
+```{r tensor decomp output}
+X <- as.tensor(T2)
+T<- tucker(X, ranks =c(3,3,3), max_iter = 50, tol = 1e-07)
+A <- T$U[[1]]
+B <- T$U[[2]]
+C <- T$U[[3]]
+XY1 <- kronecker(A[,1],t(B[,1]))
+XY2 <- kronecker(A[,2],t(B[,2]))
+XY3 <- kronecker(A[,3],t(B[,3]))
+#dev.off()
+par(mfrow=c(2,2))
+par(mar = rep(2, 4))
+image(XY1)
+image(XY2)
+image(XY3)
+matplot(C,type="l",main="Tucker Decomposition Result T2",xlab="",ylab="")
+```
+
+```{r tensor decomp output}
+X <- as.tensor(T3)
+T<- tucker(X, ranks =c(3,3,3), max_iter = 50, tol = 1e-07)
+A <- T$U[[1]]
+B <- T$U[[2]]
+C <- T$U[[3]]
+XY1 <- kronecker(A[,1],t(B[,1]))
+XY2 <- kronecker(A[,2],t(B[,2]))
+XY3 <- kronecker(A[,3],t(B[,3]))
+#dev.off()
+par(mfrow=c(2,2))
+par(mar = rep(2, 4))
+image(XY1)
+image(XY2)
+image(XY3)
+matplot(C,type="l",main="Tucker Decomposition Result T3",xlab="",ylab="")
+```

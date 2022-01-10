@@ -1,0 +1,32 @@
+{
+    "id": "BBC75C88",
+    "path": null,
+    "project_path": null,
+    "type": "r_dataframe",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1628045291825.0,
+    "source_on_save": false,
+    "relative_order": 7,
+    "properties": {
+        "expression": "Z_nonrandom",
+        "caption": "Z_nonrandom",
+        "totalObservations": 100,
+        "displayedObservations": 100,
+        "variables": 100,
+        "cacheKey": "D37213B2",
+        "object": "Z_nonrandom",
+        "environment": "",
+        "contentUrl": "grid_resource/gridviewer.html?env=&obj=Z_nonrandom&cache_key=D37213B2&max_cols=50",
+        "preview": 0
+    },
+    "folds": "",
+    "lastKnownWriteTime": 32370142020108387,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1628045291825,
+    "read_only": false,
+    "read_only_alternatives": []
+}

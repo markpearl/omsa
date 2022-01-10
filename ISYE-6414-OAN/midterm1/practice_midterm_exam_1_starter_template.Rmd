@@ -1,0 +1,83 @@
+---
+title: "Practice Midterm Exam 1"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 3: Data Analysis
+
+For this part, you will need to use R and the following dataset: 
+
+The dataset was collected from Airbnb with data on listings in the city of Asheville, NC, and can be downloaded here: https://gatech.instructure.com/courses/139200/files/folder/Practice%20Midterm%201?preview=15402865. 
+
+Here is the data provided for each listing:
+
+room id: A unique number identifying an Airbnb listing.
+host id: A unique number identifying an Airbnb host.
+room type: One of 'Entire home/apt','Private room', or 'Shared room'
+reviews: The number of reviews that a listing has received.
+overall satisfaction: The average rating (out of five) that the listing has received from those vistors who left a review.
+accommodates: The number of gusts a listing can accommodate.
+bedrooms: The number of bedrooms a listing offers.
+price: The price (in USD) for a night stay. In early surveys, there may be some values that were recorded by month.
+Fit a multiple linear regression model named 'model1' using price as the response variable and the following predicting variables: room type, reviews, overall satisfaction, accommodates, and bedrooms.
+
+To read the data in R, save the file in your working directory (make sure you have changed the directory if different from the R working directory) and read the data using the R function read.csv().
+
+```{r}
+# Read in the data
+data = read.csv("tomslee_airbnb_asheville_1498_2017-07-20.csv", head = TRUE, sep = ",")
+# Show the first few rows of data
+head(data, 3)
+```
+
+## Question 25
+
+Which coefficients (including intercept) are statistically significant at the 99% confidence level?
+
+```{r}
+# Your code here...
+
+```
+
+## Question 26
+
+What is the estimated coefficient for room type = "Private Room"?
+
+```{r}
+# Your code here...
+
+```
+
+## Question 27
+
+What is the interpretation for the estimated coefficient for room type = "Private Room"?
+
+```{r}
+# Your code here...
+
+```
+
+## Question 28
+
+Assess whether the model assumptions hold.
+
+```{r}
+# Your code here...
+
+```
+
+## Question 29
+
+Using your model, make a prediction for a listing on Airbnb in Asheville with the following factors: bedrooms = 1, accommodates = 2, reviews = 92, overall_satisfaction = 3.5, and room_type = 'Private room'. What is your predicted price for such a listing and the corresponding 95% prediction interval?
+
+```{r}
+# Your code here...
+
+```

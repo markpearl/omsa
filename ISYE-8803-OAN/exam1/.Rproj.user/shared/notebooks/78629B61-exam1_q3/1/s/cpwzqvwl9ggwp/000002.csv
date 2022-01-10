@@ -1,0 +1,106 @@
+"0","library(imager)"
+"2","Loading required package: magrittr
+"
+"2","
+Attaching package: ‘imager’
+
+"
+"2","The following object is masked from ‘package:magrittr’:
+
+    add
+
+"
+"2","The following objects are masked from ‘package:stats’:
+
+    convolve, spectrum
+
+"
+"2","The following object is masked from ‘package:graphics’:
+
+    frame
+
+"
+"2","The following object is masked from ‘package:base’:
+
+    save.image
+
+"
+"0","library(pracma)"
+"2","
+Attaching package: ‘pracma’
+
+"
+"2","The following objects are masked from ‘package:magrittr’:
+
+    and, mod, or
+
+"
+"0","library(R.matlab)"
+"2","R.matlab v3.6.2 (2018-09-26) successfully loaded. See ?R.matlab for help.
+"
+"2","
+Attaching package: ‘R.matlab’
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    getOption, isOpen
+
+"
+"0","library(cluster)    "
+"0","library(factoextra)"
+"2","Loading required package: ggplot2
+"
+"2","Need help getting started? Try the R Graphics Cookbok: https://r-graphics.org
+"
+"2","Welcome! Want to learn more? See two factoextra-related books at https://goo.gl/ve3WBa
+"
+"0","library(profvis)"
+"2","Registered S3 method overwritten by 'htmlwidgets':
+  method           from         
+  print.htmlwidget tools:rstudio
+"
+"0","library(magick)"
+"2","Linking to ImageMagick 6.9.12.3
+Enabled features: cairo, freetype, fftw, ghostscript, heic, lcms, pango, raw, rsvg, webp
+Disabled features: fontconfig, x11
+"
+"0","#install.packages(""BiocManager"")"
+"0","#BiocManager::install(""EBImage"")"
+"0","library(EBImage)"
+"2","
+Attaching package: ‘EBImage’
+
+"
+"2","The following objects are masked from ‘package:imager’:
+
+    channel, dilate, display, erode, resize, watershed
+
+"
+"0","library(ijtiff)"
+"2","
+Attaching package: ‘ijtiff’
+
+"
+"2","The following object is masked from ‘package:EBImage’:
+
+    display
+
+"
+"2","The following object is masked from ‘package:magick’:
+
+    as_EBImage
+
+"
+"2","The following object is masked from ‘package:imager’:
+
+    display
+
+"
+"0","# read a sample file (R logo)"
+"0","img <- read_tif(""matlab.tif"")"
+"2","Reading matlab.tif: an 8-bit, 2136x2734 pixel image of
+unsigned integer type. Reading 3 channels and 1 frame . . .
+"
+"2"," Done.
+"

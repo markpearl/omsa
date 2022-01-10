@@ -1,0 +1,45 @@
+"0","beans <- read_csv('./Question1.csv')"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m--------------------------------------------------------------------------------------[39m
+cols(
+  Area = [32mcol_double()[39m,
+  Perimeter = [32mcol_double()[39m,
+  MajorAxisLength = [32mcol_double()[39m,
+  MinorAxisLength = [32mcol_double()[39m,
+  AspectRation = [32mcol_double()[39m,
+  Eccentricity = [32mcol_double()[39m,
+  ConvexArea = [32mcol_double()[39m,
+  EquivDiameter = [32mcol_double()[39m,
+  Extent = [32mcol_double()[39m,
+  Solidity = [32mcol_double()[39m,
+  roundness = [32mcol_double()[39m,
+  Compactness = [32mcol_double()[39m,
+  ShapeFactor1 = [32mcol_double()[39m,
+  ShapeFactor2 = [32mcol_double()[39m,
+  ShapeFactor3 = [32mcol_double()[39m,
+  ShapeFactor4 = [32mcol_double()[39m,
+  Class = [32mcol_double()[39m
+)
+
+"
+"0","#Split data into test and train"
+"0","train <- beans[0:2800,]"
+"0","test <- beans[2801:3871,]"
+"0",""
+"0","#Modify class variable to map back to a factor"
+"0","train <-"
+"0","  train %>% mutate(ClassFactor = case_when("
+"0","        Class == 1 ~ ""Barbunya"","
+"0","        Class == 2 ~ ""Bombay"","
+"0","        TRUE ~ ""Seker""))"
+"0",""
+"0","train$Class <- as.factor(train$Class)"
+"0",""
+"0","test <-"
+"0","  test %>% mutate(ClassFactor = case_when("
+"0","        Class == 1 ~ ""Barbunya"","
+"0","        Class == 2 ~ ""Bombay"","
+"0","        TRUE ~ ""Seker""))"
+"0",""
+"0","test_x <- test[,0:16]"
+"0","y_actual <- test[,17]"

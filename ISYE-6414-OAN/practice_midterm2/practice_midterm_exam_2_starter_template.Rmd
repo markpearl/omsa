@@ -1,0 +1,83 @@
+---
+title: "Practice Midterm 2"
+author: "ISYE 6414 OAN"
+date: "2020 Fall"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The data analyzed in this part of the exam came from medical patients who have suffered from a heart attack within the past year. The data can be downloaded at https://gatech.instructure.com/courses/139200/files/13984885/download?wrap=1.
+
+The response variable is *still_alive* which is a binary variable indicating if the patient is still living or not (0=dead, 1=alive).
+
+The predicting variables are as follows:
+
+* age -- age in years when heart attack occurred
+* pericardial_effusion-- Pericardial effusion is fluid around the heart. This is a binary variable: 0=no fluid, 1=fluid.
+* fractional_shortening -- a measure of contractility around the heart. Lower numbers are increasingly abnormal
+* lvdd -- left ventricular end-diastolic dimension. This is a measure of the size of the heart at end-diastole. Large hearts tend to be sick hearts
+
+
+Read the data and answer the questions below:
+```{r}
+# Loading of the data
+
+echo= read.csv("echo.csv", header=TRUE, sep=",")
+
+# Viewing first few rows of data
+
+head(echo)
+```
+
+
+## Q21
+Plot the boxplots to describe the relationship between the response (still_alive) and the following predicting variables: *age*,  *fractional_shortening*, and *lvdd*. Intepret the plots.
+
+```{r}
+## Your code here...
+
+```
+
+## Q22
+Create a logistic regression model using the following predicting variables: *age*, *fractional_shortening*, and *lvdd*.  
+
+a) What are the model parameters and what are their estimates? 
+
+b) Which of the parameters are statistically significant at the 95% confidence level? 
+
+```{r}
+## Your code here...
+
+```
+
+## Q23
+Provide the equation for the estimated logit transformation of the probability of still being alive given the predicting variables. 
+
+
+
+## Q24
+Interpret the estimated value of the parameter corresponding to *age* in the context of this problem. 
+
+
+
+## Q25
+Perform a test for the overall regression, using $\alpha = 0.05$. Does the overall regression have explanatory power?
+```{r}
+## Your code here...
+
+```
+
+## Q26
+How does the log-odds change with a 1 unit increase in *fractional_shortening*, holding all other variables constant? Explain.
+
+
+
+## Q27
+What is the approximated distribution of the null deviance? What is the value of the null deviance and its degree of freedom?
+

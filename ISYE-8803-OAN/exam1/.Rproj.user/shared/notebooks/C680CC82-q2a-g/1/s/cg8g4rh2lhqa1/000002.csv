@@ -1,0 +1,6 @@
+"0","layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))"
+"0","level=100"
+"0","BW_100=horse_grayscale_rescaled"
+"0","BW_100[horse_grayscale_rescaled>level] = 1"
+"0","BW_100[horse_grayscale_rescaled<=level] = 0"
+"0","plot(BW_100,main = 'Threshold Transformation Level = 100')"

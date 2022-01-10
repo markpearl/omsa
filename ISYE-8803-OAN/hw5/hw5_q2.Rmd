@@ -1,0 +1,76 @@
+---
+title: "hw5"
+author: "Mark Pearl"
+date: "7/25/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## HW5 Q2
+
+```{r matrix completion}
+library(R.matlab) 
+library(matlab)
+n1 <- 50
+n2 <- 50
+A <- matrix(sample(-50:50,n1*n2, replace=TRUE),n1,n2) 
+r <- 2
+decomp <- svd(A)
+U <- decomp$u
+s <- decomp$d
+V <- decomp$v
+
+s[(r+1): length(s)] <- 0
+S <-diag(s)
+
+X <- U %*% S %*% t(V)
+X0 <- X
+# Removing 20% of the observations
+A <- matrix(runif(n1*n2, min = 0, max = 1),n1,n2)>0.5
+X[A] <- 0
+m <- sum(sum(A==0))
+m
+# Initialization
+Y <- matrix(0,n1,n2)
+delta <- (n1*n2)/m
+tau <- 250
+# Iterations
+vec <- rep(0,500)
+err <- rep(0,500)
+for (i in 1:500){
+  decomp <- svd(Y)
+  U <- decomp$u
+  S <- decomp$d
+  V <- decomp$v
+  S_t <- S-tau
+  S_t[S_t<0] <- 0
+  Z <- U%*%diag(S_t)%*%t(V)
+  P <- X-Z
+  P[A] <- 0
+  Y0 <- Y
+  Y <- Y0 + delta*P
+  vec[i] <- sum(sum((Y-Y0)^2))
+  err[i] <- sum(sum((X0-Z)^2))/sum(sum((X0)^2))
+}
+#plot(vec,type="l")
+#plot(err,type="l")
+Ar <- as.vector(A)
+Xr <- as.vector(X0)
+Xr <- Xr[Ar]
+Zr <- as.vector(Z)
+Zr <- Zr[Ar]
+#dev.off()
+par(mfrow=c(1,2))
+plot(Xr,type="l")
+lines(Zr, col="red",lty=2)
+plot(Xr-Zr,type="l")
+#dev.off()
+par(mfrow=c(1,2))
+imagesc(Z, main ="M")
+imagesc(X0, main ="M0")
+
+```
+

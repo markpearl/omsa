@@ -1,0 +1,7 @@
+"0","horse_resized <- resize(horse_I, dim(horse_I)[1]/3)"
+"0","dim(horse_resized)[1:2]"
+"1","[1]"
+"1"," 333"
+"1"," 188"
+"1","
+"

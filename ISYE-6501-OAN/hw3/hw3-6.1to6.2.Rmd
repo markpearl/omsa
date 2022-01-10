@@ -1,0 +1,92 @@
+---
+title: "hw3-6.1-2"
+author: "Mark Pearl"
+date: "29/01/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+6.1
+At work we have a number of clients in the oil & gas industry who need to have sophistication for the area of preventative maintenance with sensor data. Near-real time streaming data feeds into an enterprise data platform to conduct time-series analytics on the health of various machines across different oil sites. CUSUM is an applicable approach for solving this problem as the health of the machine needs to stay below a set threshold set from maintenance staff.
+
+We want our approach to be conservative enough so we don't measure false alarms but tolerant enough to prevent major breakdowns. This would allude to use choosing a moderate level for our threshold. 
+
+https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/NCSS/CUSUM_Charts.pdf
+
+Based on the following resource we can see that suitable values for T is 5 and the value for c is usually set to 0.5. If downtimes were extremely critical then we would likely choose a lower threshold.
+
+
+##6.2.1 Cusum Calculation: 
+In this section we'll be calculating the cusum by calculating the mean for each day across all years from 1996 to 2015. We'll then iterate across each year and subtract the x of t and c from the mean as we're looking to detect change for a decrease in temperature.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r uscrime_data with sample}
+temps_data <- read.table('C:/Users/mjpearl/Desktop/omsa/ISYE-6501-OAN/hw3/data/temps.txt',header = TRUE, stringsAsFactors = FALSE)
+head(temps_data)
+```
+
+```{r cusum function}
+#Calculate the average temperate for each across day across all years from 1995 to 2015
+x_of_t <- rowMeans(temps_data[c(2:length(temps_data))], dims=1, na.rm=T)
+
+#Compute the mean for all values of x of t to get mu
+mu <- mean(x_of_t)
+
+#Set our value of C to help moderate our values to ensure we don't go over the threshold
+C <- 4
+
+#Now to compute S of t to determine if we're experiencing a change below our threshold we use the formula (mu - x_of_t - C) instead of using (x_of_t - mu - C) which is detecting an increase 
+s_of_t <- x_of_t - mu - C
+
+#Craete an empty vector with an issue value of 0 but will be appended the value of cusum in a loop for each observation
+precusum <- 0 * s_of_t
+cusum <- append(precusum, 0)
+
+#Loop through all observations to update the cusum value and check to #see if it's negative. If it's negative then the value cusum value is #set to 0, otherwise initialize it with the value and keep looping
+for (i in 1:length(s_of_t)) 
+     {
+  cusum_value <- cusum[i] + s_of_t[i]
+  ifelse(cusum_value > 0, cusum[i+1] <- cusum_value, cusum[i+1] <- 0) 
+}
+plot(cusum)
+```
+```{r check temp drop}
+which(cusum > 85)
+temps_data[56, 1]
+```
+From our results we can determine that there is a temperate change starting from the 56th obversation/row in the dataset or August 25th onwards. 
+
+
+##6.2.2 Cusum calculation:
+Use a CUSUM approach to make a judgment of whether Atlanta’s summer climate has gotten warmer in that time (and if so, when)
+```{r cusum2 function}
+#Calculate the average temperate for each year up until we see a drop in the change of weather measured at August 26th. We could calculate the exact date for each year, but instead we're using a simpler approach of just taking a sample of the primary dataset up until that observation. We'll need to use colMeans instead of rowMeans for this portion
+temps_subset <- temps_data[1:56,]
+x_of_t2 <- colMeans(temps_subset[c(2:length(temps_subset))], dims=1, na.rm=T)
+
+#Compute the mean for all values of x of t to get mu
+mu2 <- mean(x_of_t2)
+
+#Set our value of C to help moderate our values to ensure we don't go over the threshold
+C <- 2
+
+#Now to compute S of t to determine if we're experiencing a change below our threshold we use the formula (mu - x_of_t - C) instead of using (x_of_t - mu - C) which is detecting an increase 
+s_of_t2 <- x_of_t2 - mu2 - C
+
+#Craete an empty vector with an issue value of 0 but will be appended the value of cusum in a loop for each observation
+precusum2 <- 0 * s_of_t2
+cusum2 <- append(precusum2, 0)
+
+#Loop through all observations to update the cusum value and check to #see if it's negative. If it's negative then the value cusum value is #set to 0, otherwise initialize it with the value and keep looping
+for (i in 1:length(s_of_t2)) 
+     {
+  cusum_value2 <- cusum2[i] + s_of_t2[i]
+  ifelse(cusum_value2 > 0, cusum2[i+1] <- cusum_value2, cusum2[i+1] <- 0) 
+}
+plot(cusum2)
+```
+
+From this result we can conclude that we are detecting changes above the threshold on several occasions throughout this time interval. More so in the later years. However, it doesn't seem to follow a consistent trend and the results are inconclusive of whether the climate has got warmer.

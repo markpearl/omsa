@@ -1,0 +1,2 @@
+"0","spar = allspar[which.min(GCV)]"
+"0","points(spar,GCV[which.min(GCV)],col = ""red"",lwd=5)"

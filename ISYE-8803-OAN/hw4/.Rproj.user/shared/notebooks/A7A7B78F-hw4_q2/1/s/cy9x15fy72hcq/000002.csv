@@ -1,0 +1,8 @@
+"0","# Elastic"
+"0","alpha_seq = seq(0.1,0.99,0.01)"
+"0","lambda_min_list <- rep(0,length(alpha_seq))"
+"0","for (i in c(1:length(alpha_seq))) {"
+"0","  elastic = cv.glmnet(as.matrix(X_train), as.matrix(y_train),alpha=alpha_seq[i], family = ""gaussian"", intercept = FALSE, nfolds=20)"
+"0","  lambda_elastic = elastic$lambda.min"
+"0","  lambda_min_list[i]=lambda_elastic"
+"0","}"

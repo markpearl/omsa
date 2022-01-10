@@ -1,0 +1,90 @@
+---
+title: "Homework 6-Regression with PCA"
+author: "Mark Pearl"
+date: "19/02/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+## 9.1 Regression with PCA
+
+Using the same crime data set uscrime.txt as in Question 8.2, apply Principal Component Analysis
+and then create a regression lm_model using the first few principal components. Specify your new lm_model in
+terms of the original variables (not the principal components), and compare its quality to that of your
+solution to Question 8.2. You can use the R function prcomp for PCA. (Note that to first scale the data,
+you can include scale. = TRUE to scale as part of the PCA function. Don’t forget that, to make a
+prediction for the new city, you’ll need to unscale the coefficients (i.e., do the scaling calculation in
+reverse)!)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r uscrime_data with sample}
+uscrime_data <- read.table('C:/Users/mjpearl/Desktop/omsa/ISYE-6501-OAN/hw6/data/uscrime.txt',header = TRUE, stringsAsFactors = FALSE)
+head(uscrime_data)
+```
+
+## 9.1 Regression for PCA for US Crime Data
+The following plots will conduct exploratory analysis on the data to get a sense of the data's distribution for each variable.
+
+```{r summary statistics}
+summary(uscrime_data)
+```
+There's potentially a few variables in this dataset such as Population which could require scaling or normalization. In addition, based on our last findings from a previous homework, it might be beneficial to remove outlier values towards the upper quartile.
+
+```{r scatterplot}
+## 75% of the sample size for the uscrime dataset
+pairs(~M+Po1+Po2+LF+M.F+Pop+Wealth+Ineq,data=uscrime_data,
+   main="Simple Scatterplot Matrix")
+```
+
+As we can see, there seems to be a positive correlation between Po1 and Po2 and a negative correlation between Wealth and Inequality. There are several approaches we can use to deal with these features. One approach through feature engineering would be to conduct PCA (Principal Component Analysis) on the correlated features to produce a net new feature which alleviates the co-linearity.
+
+PCA will calculate the eigenvector corresponding to the largest eigenvalue of the covariance matrix. These PCA features will help us explain the greatest proportion of the variability in the dataset.
+
+```{r pca calculation and summary for the first 2 PCA features}
+#Conduct PCA on the training dataset
+pca <- prcomp(uscrime_data[-16],  scale=TRUE)
+
+# create coloring label
+class.color <- c(rep(2,100),rep(3,100))
+
+plot(pca$x, col = class.color, main = 'Samples on their new axis representing orthogonal features')
+```
+Based on our result we can see that with the orthogonal representation it significantly reduces the multicolineairty of these features, which will make up a majority of the variance for the dataset. Let's determine how much variance is explained by our principal component features.
+
+```{r determine variance}
+# calculate the variance explained by the PCs in percent
+variance.total <- sum(pca$sdev^2)
+variance.explained <- pca$sdev^2 / variance.total * 100
+print(variance.explained)
+```
+From our findings we can see that over 50% of the variance can be explained by the first 5 PCA features from the result. Let's use these to now construct a new lm_model to use the first 5 features and see how this impacts our performance results.
+
+
+```{r run model on PCA features}
+#number of PCs we want to test = k
+k  = 5
+
+#we now combine PCs 1:k with the crime data from our original data set
+pca_crimedata <- cbind(pca$x[,1:k],uscrime_data[,16])
+
+lm_model <- lm(V6~., data = as.data.frame(pca_crimedata))
+summary(lm_model)
+```
+We can see compared to last week's results that we get a lower adjusted R2 value of 0.62. However since the difference is insignificant we can conclude that the model performs just as well with a reduced feature set. In production setting this can be very useful, espiecially for reducing training time!
+
+```{r run predict function}
+
+#now we will run the predict function on our test dataset to determine the performance of the model
+test_data <- data.frame(M= 14.0, So = 0, Ed = 10.0, Po1 = 12.0, Po2 = 15.5,
+                    LF = 0.640, M.F = 94.0, Pop = 150, NW = 1.1, U1 = 0.120, U2 = 3.6, Wealth = 3200, Ineq = 20.1, Prob = 0.040,Time = 39.0)
+
+pred_df <- data.frame(predict(pca, test_data)) 
+pred <- predict(lm_model, pred_df)
+
+```
+
+We can conclude our model produces nearly the same accuracy at a fraction of the cost as the observed value is very close with that we determined in exercise 8.2!

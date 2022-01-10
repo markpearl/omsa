@@ -1,0 +1,1 @@
+"0","text(lambda_min~which.min(lambda_min_list), labels=sprintf(""%s Optimal Lambda for Alpha of: %s"",round(lambda_min,5),alpha_seq[which.min(lambda_min_list)]),cex=0.9, font=2,pos=2)"

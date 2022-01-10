@@ -1,0 +1,118 @@
+---
+title: "hw2"
+author: "Mark Pearl"
+date: "7/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(R.matlab)
+library(rmatio)
+library(fda)
+library(pracma)
+library(gglasso)
+library(rTensor)
+library(grpreg)
+```
+
+```{r q3 data files}
+#Read in and cleanse the data
+nsc_train_x <- read.mat('./data/NSC.mat')$x[[1]]
+nsc_train_y <- read.mat('./data/NSC.mat')$y
+```
+
+
+```{r 3a plot the training data each sensor}
+#Read in and cleanse the data
+sensor_names <- c("air aspirated per cylinder","engine rotational speed","total quantity of fuel injected","low presure EGR valve",
+                  "inner torque","accelerator pedal position","aperture ratio of inlet valve","downstreem intercooler preasure","fuel in the 2nd pre-injection","vehicle velocity")
+p = 10     #Number of parameters
+m = 150
+n = 203
+par(mfrow=c(2,5))
+X_train = array(0,dim=c(m,n,p))
+for(i in 1:p)
+{
+  X_train[,,i]=nsc_train_x[[i]]
+  matplot(t(nsc_train_x[[i]]), type = "l", xlab = sensor_names[i],ylab = "")
+}
+```
+
+```{r 3b create b-spline basis for x and y}
+Z_train = array(0,dim=c(m,10,p))
+Y_train = array(0,dim=c(m,n))
+
+x = seq(0,1,length=203)
+splinebasis_B=create.bspline.basis(c(0,1),10)
+base_B=eval.basis(as.vector(x),splinebasis_B)
+
+for (i in 1:10){
+  Z_train[,,i] = X_train[,,i] %*% base_B
+}
+
+YB_train = nsc_train_y %*% base_B
+Z_matrix = matrix(Z_train ,150,100)
+
+Z_stack=matrix(kronecker(diag(10),Z_train),1500,1000)
+Y2B_stack = as.vector(YB_train)
+```
+
+```{r 3d create b-spline basis for x and y}
+group = rep(1:10,each=100)
+
+glasso = cv.grpreg(Z_stack,Y2B_stack,group)
+```
+
+```{r 3d create b-spline basis for x and y}
+glasso_lambda <- min(glasso$lambda)
+which(glasso$fit$beta[,glasso$min]==0)
+```
+
+#From the results we can see that the 6th variable related to "accelerator pedal position" has been pushed to 0 in the group coefficients, and all other have some correlation with the target variable. 
+
+
+```{r 3d create b-spline basis for x and y}
+p = 10     #Number of parameters
+m = 50
+n = 203
+nsc_test_x <- read.mat('./data/NSC.test.mat')$x[[1]]
+nsc_test_y <- read.mat('./data/NSC.test.mat')$y
+X_test = array(0,dim=c(m,n,p))
+
+for(i in 1:p)
+{
+  X_test[,,i]=nsc_test_x[[i]]
+}
+
+Z_test = array(0,dim=c(m,10,p))
+Y_test = array(0,dim=c(m,n))
+
+for (i in 1:10){
+  Z_test[,,i] = X_test[,,i] %*% base_B
+}
+
+YB_test = nsc_test_y %*% base_B
+Z_matrix = matrix(Z_test ,50,100)
+
+Z_stack=matrix(kronecker(diag(10),Z_test),500,1000)
+Y2B_stack = as.vector(YB_test)
+```
+
+```{r 3d create b-spline basis for x and y}
+y_pred_glasso <- predict(glasso,Z_stack,lambda=glasso_lambda)
+mse_glasso = sum((Y2B_stack-y_pred_glasso)^2)/n
+mse_glasso
+```
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,7 @@
+"0","Ar <- as.vector(A)"
+"0","Xr <- as.vector(original)"
+"0","Xr_random <- Xr[Ar]"
+"0","Zr <- as.vector(Z_random)"
+"0","Zr_random <- Zr[Ar]"
+"0","#dev.off()"
+"0","par(mfrow=c(1,2))"

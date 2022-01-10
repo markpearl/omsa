@@ -1,0 +1,105 @@
+---
+title: "hw1"
+author: "Mark Pearl"
+date: "5/30/2021"
+output: html_document
+---
+
+
+```{r question4a}
+library(randomForest)
+#Read in data files and construct 
+ecg_train <- read.table(file = "./ECG200TRAIN", sep = ",")
+ecg_train_y <- ecg_train$V1
+ecg_train <- ecg_train[, !(colnames(ecg_train) %in% c("V1"))]
+ecg_train <- as.matrix(ecg_train)
+ecg_train_y[ecg_train_y < 0] <- 0
+
+ecg_test <- read.table(file = "./ECG200TEST", sep = ",")
+ecg_test_y <- ecg_test$V1
+ecg_test_y[ecg_test_y < 0] <- 0
+ecg_test <- ecg_test[, !(colnames(ecg_test) %in% c("V1"))]
+ecg_test <- as.matrix(ecg_test)
+
+
+#Conduct feature extraction using B-splines
+x = seq(0,1,length.out=length(colnames(ecg_train)))
+```
+
+```{r question4a}
+# Option 1: B-splines
+library(splines)
+knots = seq(0,1,length.out = 8)
+B = bs(x, knots = knots, degree = 3)[,1:10]
+Bcoef_train = matrix(0,dim(ecg_train)[1],10)
+Bcoef_test = matrix(0,dim(ecg_test)[1],10)
+train <- seq(1, dim(ecg_train)[1])
+test <- seq(dim(ecg_train)[1]+1,dim(ecg_train)[1]+dim(ecg_test)[1])
+train_test_split <- c(train,test)
+for(i in train_test_split)
+{
+  if (i %in% train) { 
+    Bcoef_train[i,] = solve(t(B)%*%B)%*%t(B)%*%ecg_train[i,]
+  }
+  else {
+    Bcoef_test[i-100,] = solve(t(B)%*%B)%*%t(B)%*%ecg_test[i-100,]
+  }
+}
+
+fit = randomForest(factor(ecg_train_y) ~ .,
+                   data=cbind.data.frame(as.data.frame(Bcoef_train),ecg_train_y))
+
+
+pred4a = predict(fit,Bcoef_test)
+cf_matrix <- table(ecg_test_y,pred4a)
+
+matplot(x,t(ecg_test[pred4a==0,]),type="l",col = "blue",ylab = "y",ylim = c(-4,4),main="Classification using B-spline coefficients")
+#
+X2 = ecg_test[pred4a == 1,]
+for(i in 1:length(pred4a[pred4a==1]))
+{
+  lines(x,X2[i,],col = "red")
+}
+
+
+```
+```{r question4a accuracy}
+library(caret)
+library(e1071)
+confusionMatrix(data=pred4a, reference=factor(ecg_test_y))
+```
+
+```{r question4a}
+# Option 2: FPCA
+library(fda)
+splinebasis = create.bspline.basis(c(0,1),10)
+
+smooth = smooth.basis(x,t(rbind(ecg_train,ecg_test)),splinebasis)
+Xfun = smooth$fd
+pca = pca.fd(Xfun, 10)
+var.pca = cumsum(pca$varprop)
+nharm = sum(var.pca < 0.95) + 1
+pc = pca.fd(Xfun, nharm)
+
+#(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))
+plot(pc$scores[ecg_train_y==0,],xlab = "FPC-score 1", ylab = "FPC-score 2",col = "blue",ylim=c(-1,1))
+points(pc$scores[ecg_train_y==1,],col = "red")
+FPCcoef = pc$scores
+
+fit = randomForest(factor(ecg_train_y) ~ .,
+                   data=cbind.data.frame(as.data.frame(FPCcoef[train,]),ecg_train_y))
+pred4b = predict(fit,FPCcoef[-train,])
+#cf_matrix <- table(labtest,pred4b)
+matplot(x,t(ecg_test[pred4b==0,]),type="l",col = "blue",ylab = "y",ylim = c(-4,4),main="Classification using FPCA scores")
+#
+X2 = ecg_test[pred4b == 1,]
+for(i in 1:length(pred4b[pred4b==1]))
+{
+  lines(x,X2[i,],col = "red")
+}
+```
+```{r question4a accuracy}
+confusionMatrix(data=pred4b, reference=factor(ecg_test_y))
+```
+
+

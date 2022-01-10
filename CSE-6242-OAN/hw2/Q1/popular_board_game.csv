@@ -1,0 +1,245 @@
+name,category,playtime,playtime_num,avg_rating,num_ratings,min_players
+Agricola,Economic,>90,150,7.988569999999999,61557,1
+Puerto Rico,Economic,>90,150,8.0359,61157,3
+Small World,Fighting,"(60, 90]",80,7.29949,59211,2
+Codenames,Deduction,<=30,15,7.71148,62563,2
+Power Grid,Economic,>90,120,7.890039999999999,54420,2
+King of Tokyo,Fighting,<=30,30,7.23048,54881,2
+Love Letter,Deduction,<=30,20,7.25253,53131,2
+Splendor,Economic,<=30,30,7.473310000000001,54445,2
+Citadels,Bluffing,"(30, 60]",60,7.10124,46905,2
+Dixit,Party Game,<=30,30,7.29405,47812,3
+Race for the Galaxy,Economic,"(30, 60]",60,7.7624,44579,2
+Scythe,Economic,>90,115,8.2841,52513,1
+Terraforming Mars,Economic,>90,120,8.403310000000001,57359,1
+Munchkin,Fighting,>90,120,5.92127,39939,3
+Arkham Horror,Fighting,>90,360,7.29157,36102,1
+Dead of Winter: A Crossroads Game,Bluffing,>90,120,7.67747,37602,2
+Terra Mystica,Economic,>90,150,8.19293,37276,2
+Hanabi,Deduction,<=30,25,7.1373,36775,2
+The Resistance,Bluffing,<=30,30,7.33418,34774,5
+Battlestar Galactica: The Board Game,Bluffing,>90,300,7.740819999999999,32005,3
+Coup,Bluffing,<=30,15,7.03729,33927,2
+Star Realms,Fighting,<=30,20,7.60884,33898,2
+Magic: The Gathering,Fighting,<=30,20,7.47773,31086,2
+Robinson Crusoe: Adventures on the Cursed Island,Fighting,>90,120,7.90738,31773,1
+Blood Rage,Fighting,"(60, 90]",90,8.031080000000001,31455,2
+Caylus,Economic,>90,150,7.8110800000000005,26174,2
+Gloomhaven,Fighting,>90,120,8.89906,37075,1
+Tzolk'in: The Mayan Calendar,Economic,"(60, 90]",90,7.92748,28786,2
+Android: Netrunner,Bluffing,"(30, 60]",45,7.89668,26001,2
+Eclipse,Fighting,>90,180,7.94262,25542,2
+A Game of Thrones: The Board Game (Second Edition),Bluffing,>90,240,7.6607,27362,3
+Cosmic Encounter,Bluffing,>90,120,7.555280000000001,26335,3
+Sheriff of Nottingham,Bluffing,"(30, 60]",60,7.21073,28017,3
+Caverna: The Cave Farmers,Economic,>90,210,8.0693,26739,1
+Eldritch Horror,Fighting,>90,240,7.858039999999999,27732,1
+Monopoly,Economic,>90,180,4.37636,26676,2
+Shadows over Camelot,Bluffing,"(60, 90]",80,7.13334,24892,3
+Mage Knight Board Game,Fighting,>90,240,8.106630000000001,26609,1
+BANG!,Bluffing,"(30, 60]",40,6.52314,25506,4
+Mysterium,Deduction,"(30, 60]",42,7.39843,29442,2
+Le Havre,Economic,>90,150,7.89077,25443,1
+The Resistance: Avalon,Bluffing,<=30,30,7.62483,25833,5
+Roll for the Galaxy,Economic,"(30, 60]",45,7.72867,24800,2
+Saboteur,Bluffing,<=30,30,6.6024899999999995,24198,3
+Star Wars: X-Wing Miniatures Game,Bluffing,"(30, 60]",45,7.759760000000001,22459,2
+San Juan,Economic,"(30, 60]",60,7.27255,21812,2
+Istanbul,Economic,"(30, 60]",60,7.60923,23680,2
+Concordia,Economic,>90,100,8.105360000000001,25711,2
+For Sale,Economic,<=30,30,7.216589999999999,22580,3
+Cards Against Humanity,Party Game,<=30,30,6.02013,22147,4
+Elder Sign,Fighting,"(60, 90]",90,7.00506,21321,1
+Descent: Journeys in the Dark (Second Edition),Fighting,>90,120,7.731269999999999,21853,2
+Suburbia,Economic,"(60, 90]",90,7.56653,20870,1
+Colt Express,Fighting,"(30, 60]",40,7.163119999999999,22886,2
+Ghost Stories,Fighting,"(30, 60]",60,7.352010000000001,18848,1
+Viticulture Essential Edition,Economic,"(60, 90]",90,8.14362,25735,1
+Survive: Escape from Atlantis!,Bluffing,"(30, 60]",60,7.308510000000001,19404,2
+Acquire,Economic,"(60, 90]",90,7.35261,17836,2
+Through the Ages: A Story of Civilization,Economic,>90,240,7.989739999999999,17684,2
+One Night Ultimate Werewolf,Bluffing,<=30,10,7.213360000000001,20142,3
+Star Wars: Imperial Assault,Fighting,>90,120,8.0778,19391,2
+Star Wars: Rebellion,Fighting,>90,240,8.44551,21095,2
+Mansions of Madness: Second Edition,Fighting,>90,180,8.15362,22562,1
+Apples to Apples,Party Game,<=30,30,5.85811,17184,4
+Keyflower,Economic,>90,120,7.85182,18067,2
+BANG! The Dice Game,Bluffing,<=30,15,6.990310000000001,18715,3
+Through the Ages: A New Story of Civilization,Economic,>90,120,8.531039999999999,21053,2
+Isle of Skye: From Chieftain to King,Economic,"(30, 60]",50,7.456339999999999,19015,2
+Cyclades,Fighting,"(60, 90]",90,7.5237,17126,2
+The Voyages of Marco Polo,Economic,>90,100,7.94038,18669,2
+Spyfall,Bluffing,<=30,15,6.9856,17441,3
+Troyes,Economic,"(60, 90]",90,7.76293,17608,2
+Clue,Bluffing,"(30, 60]",45,5.65866,16735,3
+The Pillars of the Earth,Economic,>90,120,7.30571,15943,2
+Brass: Lancashire,Economic,>90,120,8.12303,18149,2
+Diamant,Bluffing,<=30,30,6.831119999999999,16269,3
+Alchemists,Deduction,>90,120,7.69764,17270,2
+Zombie Dice,Party Game,<=30,20,6.21825,15634,2
+Mice and Mystics,Fighting,"(60, 90]",90,7.371410000000001,16009,1
+Modern Art,Economic,"(30, 60]",45,7.37034,15950,3
+Battle Line,Deduction,<=30,30,7.41564,15193,2
+Zombies!!!,Fighting,"(60, 90]",90,5.8306,14176,2
+Mr. Jack,Deduction,<=30,30,7.045439999999999,14639,2
+Sushi Go Party!,Party Game,<=30,20,7.51717,19687,2
+Saint Petersburg,Economic,"(30, 60]",60,7.312689999999999,14032,2
+Sherlock Holmes Consulting Detective: The Thames Murders & Other Cases,Deduction,>90,120,7.800330000000001,16023,1
+Dixit: Odyssey,Party Game,<=30,30,7.48416,15671,3
+Sentinels of the Multiverse,Fighting,"(30, 60]",60,7.273210000000001,14307,2
+Chaos in the Old World,Fighting,>90,120,7.67316,13966,3
+Friday,Fighting,<=30,25,7.1943399999999995,15356,1
+Kemet,Fighting,>90,120,7.75018,15473,2
+Last Night on Earth: The Zombie Game,Fighting,"(60, 90]",90,6.96853,13389,2
+Castle Panic,Fighting,"(30, 60]",60,6.67413,13818,1
+Codenames: Pictures,Deduction,<=30,15,7.341069999999999,15752,2
+Quarriors!,Fighting,<=30,30,6.780989999999999,12941,2
+Century: Spice Road,Economic,"(30, 60]",45,7.39227,16948,2
+Scotland Yard,Deduction,"(30, 60]",45,6.50481,13713,3
+Glory to Rome,Economic,"(30, 60]",60,7.49292,12710,2
+Stratego,Bluffing,"(30, 60]",45,6.0709800000000005,13254,2
+Dungeon Lords,Economic,"(60, 90]",90,7.417160000000001,12623,2
+Concept,Deduction,"(30, 60]",40,6.8856399999999995,14303,4
+Mansions of Madness,Fighting,>90,180,7.3316300000000005,12513,2
+Neuroshima Hex! 3.0,Fighting,<=30,30,7.41835,12870,1
+King of New York,Fighting,"(30, 60]",40,7.02216,13485,2
+Shogun,Economic,>90,120,7.55495,12550,3
+Wits & Wagers,Bluffing,<=30,25,6.94676,12917,3
+Captain Sonar,Deduction,"(30, 60]",60,7.639639999999999,14985,2
+Letters from Whitechapel,Bluffing,"(30, 60]",60,7.434589999999999,13173,2
+Legends of Andor,Fighting,"(60, 90]",90,7.24574,13913,2
+Talisman (Revised 4th Edition),Fighting,"(60, 90]",90,6.53718,12642,2
+Merchants & Marauders,Fighting,>90,180,7.435960000000001,12345,2
+Notre Dame,Economic,"(60, 90]",75,7.3657699999999995,11972,2
+Secret Hitler,Bluffing,"(30, 60]",45,7.587860000000001,16293,5
+Space Hulk: Death Angel â€“ The Card Game,Fighting,"(30, 60]",60,6.99383,11877,1
+Pathfinder Adventure Card Game: Rise of the Runelords â€“ Base Set,Fighting,"(60, 90]",90,7.27195,11763,1
+Diplomacy,Bluffing,>90,360,7.05243,11810,2
+Liar's Dice,Bluffing,<=30,30,6.91821,12127,2
+Mechs vs. Minions,Fighting,"(60, 90]",90,8.12782,13204,2
+Deception: Murder in Hong Kong,Bluffing,<=30,20,7.53145,14670,4
+A Feast for Odin,Economic,>90,120,8.180769999999999,15434,1
+Descent: Journeys in the Dark,Fighting,>90,240,7.3143,11190,2
+Evolution,Fighting,"(30, 60]",60,7.19797,12787,2
+Spirit Island,Fighting,>90,120,8.370519999999999,20755,1
+Rising Sun,Bluffing,>90,120,8.00452,14439,3
+Goa,Economic,"(60, 90]",90,7.60498,10832,2
+Ca$h 'n Guns (Second Edition),Bluffing,<=30,30,6.9594,12009,4
+Above and Below,Economic,"(60, 90]",90,7.50327,11997,2
+Nations,Economic,>90,200,7.6715100000000005,10862,1
+Telestrations,Party Game,<=30,30,7.41051,11893,4
+A Game of Thrones (First Edition),Bluffing,>90,180,7.246110000000001,10068,3
+Jungle Speed,Party Game,<=30,10,6.53659,10833,2
+War of the Ring (Second Edition),Fighting,>90,180,8.42735,12442,2
+Summoner Wars: Master Set,Fighting,"(30, 60]",60,7.55392,10193,2
+In the Year of the Dragon,Economic,>90,100,7.38305,10468,2
+HeroQuest,Fighting,"(60, 90]",90,7.102060000000001,10553,2
+Skull,Bluffing,"(30, 60]",45,7.17317,12818,3
+Axis & Allies,Economic,>90,180,6.558860000000001,10113,2
+Thunderstone,Fighting,"(30, 60]",60,6.969869999999999,9951,1
+Food Chain Magnate,Economic,>90,240,8.18414,12724,2
+Zombicide: Black Plague,Fighting,>90,180,7.73977,11801,1
+Tobago,Deduction,"(30, 60]",60,7.12657,10224,2
+Blood Bowl: Team Manager â€“ The Card Game,Fighting,"(60, 90]",90,7.3746,10081,2
+Jenga,Party Game,<=30,20,5.58245,10913,1
+Ca$h 'n Gun$,Bluffing,<=30,30,6.609139999999999,9649,4
+Welcome to the Dungeon,Bluffing,<=30,30,6.65729,11065,2
+Legendary Encounters: An Alien Deck Building Game,Fighting,"(30, 60]",60,7.79776,10639,1
+Gaia Project,Economic,>90,150,8.53656,14283,1
+Taboo,Party Game,<=30,20,6.28354,9974,4
+Steam,Economic,"(60, 90]",90,7.6248,9373,3
+Ora et Labora,Economic,>90,180,7.71547,9487,1
+Bruges,Economic,"(30, 60]",60,7.45063,9855,2
+Clans of Caledonia,Economic,>90,120,8.05595,13184,1
+Champions of Midgard,Fighting,"(60, 90]",90,7.79091,12069,2
+Fury of Dracula (Second Edition),Deduction,>90,180,7.1504199999999996,8872,2
+Small World Underground,Fighting,"(60, 90]",90,7.299910000000001,9446,2
+Mombasa,Economic,>90,150,7.921639999999999,10357,2
+The Werewolves of Miller's Hollow,Bluffing,<=30,30,6.78826,9472,8
+The Mind,Deduction,<=30,15,7.0392399999999995,16329,2
+At the Gates of Loyang,Economic,>90,120,7.3853800000000005,9302,1
+Grand Austria Hotel,Economic,>90,120,7.77435,11021,2
+The Manhattan Project,Economic,>90,120,7.41617,8902,2
+Viticulture,Economic,"(60, 90]",90,7.6482600000000005,9633,2
+Fury of Dracula (third/fourth edition),Deduction,>90,180,7.5733,10561,2
+Nexus Ops,Fighting,"(60, 90]",90,7.22964,8359,2
+Last Will,Economic,"(60, 90]",75,7.21237,8762,2
+Amun-Re,Economic,"(60, 90]",90,7.33098,8435,3
+Poker,Bluffing,"(30, 60]",60,6.691739999999999,8879,2
+Glen More,Economic,"(60, 90]",70,7.33712,8506,2
+Mascarade,Bluffing,<=30,30,6.65192,8852,2
+Hero Realms,Fighting,<=30,30,7.6843699999999995,10986,2
+Charterstone,Economic,"(60, 90]",75,7.658930000000001,10717,1
+Codenames: Duet,Deduction,<=30,30,7.71535,11899,2
+Imperial,Economic,>90,180,7.617039999999999,8147,2
+Glass Road,Economic,"(60, 90]",80,7.459110000000001,8681,1
+Dungeons & Dragons: Castle Ravenloft Board Game,Fighting,"(30, 60]",60,6.97768,8239,1
+Arcadia Quest,Fighting,"(30, 60]",60,7.81647,8790,2
+Cranium,Party Game,"(30, 60]",60,5.68705,8318,4
+Jambo,Economic,"(30, 60]",45,7.02922,7877,2
+Pirate's Cove,Fighting,"(60, 90]",90,6.58053,7861,3
+Vikings,Economic,"(30, 60]",60,7.26584,7827,2
+Cuba,Economic,>90,120,7.157960000000001,7769,2
+Pit,Economic,"(60, 90]",90,6.39326,8042,3
+Runebound (Second Edition),Fighting,>90,240,6.889130000000001,7648,2
+Yspahan,Economic,"(30, 60]",60,7.10018,7632,2
+Heroscape Master Set: Rise of the Valkyrie,Fighting,"(60, 90]",90,7.42948,7681,2
+Condottiere,Bluffing,"(30, 60]",45,6.78654,8308,2
+Age of Steam,Economic,>90,120,7.69597,8430,1
+Shadow Hunters,Bluffing,"(30, 60]",45,6.8327,7837,4
+Once Upon a Time: The Storytelling Card Game,Party Game,<=30,30,6.4413800000000005,7878,2
+Mystery of the Abbey,Deduction,"(60, 90]",90,6.54882,7560,3
+Runewars,Fighting,>90,240,7.66713,7614,2
+Navegador,Economic,"(60, 90]",90,7.562689999999999,7812,2
+Scattergories,Party Game,<=30,30,6.15963,8092,2
+Arboretum,Bluffing,<=30,30,7.418130000000001,11523,2
+Monopoly Deal Card Game,Economic,<=30,15,6.26259,8169,2
+Anachrony,Economic,>90,120,8.13322,10136,1
+Chinatown,Economic,"(30, 60]",60,7.2674,8000,3
+Trivial Pursuit: Genus Edition,Party Game,"(60, 90]",90,5.20655,7272,2
+Mage Wars Arena,Fighting,"(60, 90]",90,7.68354,7226,2
+Dungeon Roll,Fighting,<=30,15,6.14269,7273,1
+Chicago Express,Economic,"(30, 60]",60,7.2293,7243,2
+La Granja,Economic,>90,120,7.71128,8110,1
+The Gallerist,Economic,>90,150,8.01737,8927,1
+Civilization,Economic,>90,360,7.512389999999999,7007,2
+StarCraft: The Board Game,Fighting,>90,240,7.337000000000001,6937,2
+Taj Mahal,Bluffing,>90,100,7.3042,6958,3
+Deep Sea Adventure,Party Game,<=30,30,7.08438,9578,2
+Mr. Jack Pocket,Bluffing,<=30,15,6.94803,7242,2
+Twilight Imperium (Fourth Edition),Economic,>90,480,8.72044,11474,3
+Oh My Goods!,Economic,<=30,30,7.012810000000001,8518,2
+Archipelago,Economic,>90,240,7.37949,7113,2
+Space Hulk (third edition),Fighting,"(30, 60]",60,7.53902,6613,2
+Cacao,Economic,"(30, 60]",45,7.12189,7585,2
+Carson City,Economic,"(60, 90]",90,7.27078,6632,2
+Airlines Europe,Economic,"(60, 90]",75,7.3284,6681,2
+Claustrophobia,Fighting,"(30, 60]",45,7.547280000000001,6538,2
+Finca,Economic,"(30, 60]",45,7.06826,6650,2
+Rococo,Economic,>90,120,7.578869999999999,7181,2
+Lord of the Rings: The Confrontation,Bluffing,<=30,30,7.2077800000000005,6433,2
+Flick 'em Up!,Fighting,"(30, 60]",45,7.029210000000001,7258,2
+Spartacus: A Game of Blood & Treachery,Fighting,>90,180,7.46593,6879,3
+The Red Dragon Inn,Party Game,"(30, 60]",45,6.57217,6834,2
+Tiny Epic Kingdoms,Bluffing,"(30, 60]",45,6.633589999999999,6765,2
+Pictionary,Party Game,"(60, 90]",90,5.81643,6615,3
+Cockroach Poker,Bluffing,<=30,20,6.62477,7845,2
+Forbidden Stars,Bluffing,>90,180,7.98764,7110,2
+Dinosaur Island,Economic,>90,120,7.88547,9998,1
+Yokohama,Economic,"(60, 90]",90,7.911060000000001,7951,2
+Wingspan,Economic,"(60, 90]",70,8.09865,32761,1
+Exit: The Game â€“ The Abandoned Cabin,Deduction,>90,120,7.6676,7851,1
+Fields of Arle,Economic,>90,120,8.13588,7415,1
+Schotten Totten,Deduction,<=30,20,7.30702,6975,2
+Dead of Winter: The Long Night,Bluffing,>90,120,7.7610399999999995,7271,2
+Raptor,Fighting,<=30,25,7.405930000000001,7236,2
+Not Alone,Bluffing,"(30, 60]",45,7.07762,7249,2
+KeyForge: Call of the Archons,Fighting,"(30, 60]",45,7.65602,8526,2
+Xia: Legends of a Drift System,Fighting,>90,180,7.84598,6853,3
+Brass: Birmingham,Economic,>90,120,8.60949,14551,2
+Rajas of the Ganges,Economic,"(60, 90]",75,7.69465,7731,2
+Decrypto,Deduction,"(30, 60]",45,7.80797,9659,3
+Agricola (Revised Edition),Economic,>90,120,8.12485,7982,1
+Chronicles of Crime,Deduction,"(60, 90]",90,8.03759,11684,1
+Just One,Party Game,<=30,20,7.57741,8979,3
+The Lord of the Rings: Journeys in Middle-earth,Fighting,>90,120,8.401,6688,1

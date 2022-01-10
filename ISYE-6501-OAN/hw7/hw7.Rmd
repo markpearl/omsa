@@ -1,0 +1,187 @@
+---
+title: "Homework 7-Regression with Tree-based Methods & Logistic Regression"
+author: "Mark Pearl"
+date: "26/02/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## 10.1 Regression Using Tree and Random Forest Methods with UsCrime Dataset
+
+Using the same crime data set uscrime.txt as in Questions 8.2 and 9.1, find the best model you can
+using
+(a) a regression tree model, and
+(b) a random forest model.
+In R, you can use the tree package or the rpart package, and the randomForest package. For
+each model, describe one or two qualitative takeaways you get from analyzing the results (i.e., don’t just
+stop when you have a good model, but interpret it too).
+
+## A) Regression Tree Model
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tree)
+library(randomForest)
+library(pROC)
+```
+
+```{r uscrime_data with sample}
+uscrime_data <- read.table('C:/Users/mjpearl/Desktop/omsa/ISYE-6501-OAN/hw7/data/uscrime.txt',header = TRUE, stringsAsFactors = FALSE)
+head(uscrime_data)
+```
+
+
+```{r build tree based model}
+tree_model <- tree(Crime ~., uscrime_data)
+summary(tree_model)
+```
+We can see with our tree output that it's selected the Po1, Pop, LF and NW variables. For the initial summary, this seems to be the combination of factors that are the best candidates for splitting based on the default settings for the model. 
+
+```{r plot tree based model}
+plot(tree_model)
+text(tree_model)
+```
+Now we can use the predict function for this tree to compare the observed values against the predicted observations, and determine the R^2 value to determine it's relative performance.
+
+```{r plot pred tree based model}
+y_pred_tree <- predict(tree_model)
+plot(y_pred_tree)
+```
+```{r calculate R2}
+#Based on source to create helper function for R2, which represents 1 - the residual sum of squares divided by the total sum of squares
+rsq <- function (y_pred, y_actual) {
+  residual_ss <- sum((y_pred - y_actual) ^ 2)
+  total_ss <- sum((y_actual - mean(y_actual)) ^ 2) 
+  rsq <- 1 - residual_ss / total_ss
+  return (rsq)
+}
+
+
+rsq_tree <- rsq(y_pred_tree, uscrime_data$Crime)
+rsq_tree
+```
+Based on our results for R^2 we can see the initial results provide a good estimator for the crime variable. 
+
+We can now look at pruning the tree to work backward from the leaves to determine if the estimation error has increased from the branch, in which case we'll remove it. We will cap our terminal node setting for "best" to 4 as we want to ensure we don't want a tree with too high of a max depth as this will likely produce leaves with splits that result in less< 5% of total observations and ultimately, overfitting. 
+
+```{r view frame R2}
+#Calculate the new prediction on the pruned tree with number of terminal nodes set to 4   
+tree_pruned <- prune.tree(tree_model,best= 4)
+plot(tree_pruned)
+text(tree_pruned)
+```
+We can see from the result that we have fewer leaves, and our tree is split by a reduced number of features compared to our original tree.
+
+```{r calculate R2 on Tree Results}
+y_pred_pruned <- predict(tree_pruned)
+rsq_pruned <- rsq(y_pred_pruned, uscrime_data$Crime)
+rsq_pruned
+```
+
+We can see that with a lower R^2 for our pruned tree that it accounts for less of the variance compared to our original tree. However, this is likely due to overfitting, in that the original tree will likely perform better on our training dataset as there's more features that are split on. But our pruned tree will do better on our test dataset, as it will react to newer observations with less bias.
+
+Another exercise we could do is reduce our tree a given leaf, as it splits our data appropriately in addition to accounting for a significant amount of variance with minimal feature engineering (i.e. in comparison to our previous homework exercises.). From here we can calculate the r^2 value to determine the impact on performance. 
+
+
+Now we will run the random forest model on our dataset. From the lecture we determined that the appropriate number of features to use for each tree is 1 + log(n), and a number of trees ideally specified between 500-1000. This means the number of features that will be split on to form a given sub-tree, each-tree will have different permutations of both feature and dataset combinations (using boosting). The average results across all tree will be used, compared to a classifcation result which uses the mode.
+
+```{r calculate R2 on Random Forest}
+
+num_features_rf <- 1 + log(ncol(uscrime_data))
+randomForest_model_n600 <- randomForest(Crime~., data = uscrime_data, mtry = num_features_rf, importance = T, ntree = 600)
+randomForest_model_n900 <- randomForest(Crime~., data = uscrime_data, mtry = num_features_rf, importance = T, ntree = 900)
+randomForest_model_n600
+randomForest_model_n900
+```
+
+```{r plot RF results}
+plot(randomForest_model_n600)
+plot(randomForest_model_n900)
+```
+From our results we can see that our error tends to flatten around 100 trees. We can see when tweaking the ntrees number that the tree flattens out earlier. This makes sense as increasing the number of trees will help our model generalize for marginally more variation. 
+
+``` {r feature importance plot randomForest}
+# Importance Plot
+varImpPlot(randomForest_model_n600)
+```
+
+We can see based on the feature importance plot, that the features used for splitting in the original tree model align well with this output, as a majority of the features used to split ([1] "Po1" "Pop" "LF"  "NW") can be seen at the top of graph. This is further clarified with the pruned result as the Pop feature is removed, and can be represented with moderate importance.
+
+However, when looking at the results of our summary we can see that the R2 is only 42% (i.e. shown by % Var explained in the summary output) compared to our tree-based model used previously. 
+
+
+## 10.2 Real-Life Application
+
+An example I used at work for Logistic regresison was for predicting a fraudulent customer based on various features. In this case we're looking for a binary response of 0,1. Many factors can attribute to mortgage fraud including involved parties (i.e. brokers, lawyers), FICO score, credit scores, demographic information, etc. This can be used in production to help determine which customers are more likely for fraud, and can help minimize risk for the client.  
+
+
+## 10.3 Logistic Regression with German Credit Dataset
+ Using the GermanCredit data set germancredit.txt from
+http://archive.ics.uci.edu/ml/machine-learning-databases/statlog/german / (description at
+http://archive.ics.uci.edu/ml/datasets/Statlog+%28German+Credit+Data%29 ), use logistic
+regression to find a good predictive model for whether credit applicants are good credit risks or
+not. Show your model (factors used and their coefficients), the software output, and the quality 
+of fit. You can use the glm function in R. To get a logistic regression (logit) model on data where
+the response is either zero or one, use family=binomial(link=”logit”) in your glm
+function call.
+
+```{r german_data with sample}
+german_data <- read.table('C:/Users/mjpearl/Desktop/omsa/ISYE-6501-OAN/hw7/data/germancredit.txt',header = FALSE)
+#Replace target variable value of 2 with 0 as we're training on a binary response variable
+german_data$V21[german_data$V21 == 2] <- 0
+head(german_data)
+```
+
+```{r german_data train/test split}
+sample <- sample(1:nrow(german_data), size = round(0.75*nrow(german_data)))
+train <- german_data[sample,]
+test <- german_data[-sample,]
+```
+
+```{r logistic regression model on german data}
+logistic_full <- glm(V21 ~., family = binomial(link="logit"), train)
+summary(logistic_full)
+```
+
+```{r logistic regression model on german data for important features}
+logistics_impFeatures <- glm(V21~ V1 + V2 + V3 + V4 + V5 + V6 + V7 + V9 + +V10 + V13,
+                 family=binomial(link = 'logit'),
+                 data=train)
+summary(logistics_impFeatures)
+
+```
+
+```{r predict then calculate AUC}
+y_pred_feature_selection <- predict(logistics_impFeatures, test, type = "response")
+
+
+AUC <- roc(test$V21, y_pred_feature_selection)
+plot(AUC, main = "ROC Curve")
+AUC
+```
+
+
+```{r find threshold}
+
+results <- vector("list",92)
+
+for (i in seq(8,95, by=1)){
+    thresh <- i/100
+    y_pred <- as.integer(y_pred_feature_selection > thresh)
+    table <- as.matrix(table(y_pred, test$V21))
+    cost <- table[2,1] + 5*table[1,2]
+    results[i] <- cost
+}
+
+results
+```
+
+We use these values from 0 to 92 as with the values being closer to zero or one, we get only one column. Thus helping us find threshold. 
+
+We can see with the proceeding results the threshold cuts off well at 15.
+
+```{r look at results}
+y_pred_feature_selection_final <- predict(logistics_impFeatures, test, type = "response")
+y_pred_final <- as.integer(y_pred_feature_selection_final > 0.15)
+table(y_pred_final, test$V21)
+```

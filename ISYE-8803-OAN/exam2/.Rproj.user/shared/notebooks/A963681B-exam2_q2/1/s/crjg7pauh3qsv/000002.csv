@@ -1,0 +1,7 @@
+"0","#Create single feature for parents education"
+"0","Alcohol_Consumption <- students$Alcohol_Consumption"
+"0","Parents_Education <- students$Parents_Education"
+"0",""
+"0","students_dummies_final = cbind(students_dummies,Alcohol_Consumption,Parents_Education)"
+"0","students_dummies_final <- dummy_cols(students_dummies_final, select_columns = ""Alcohol_Consumption"")"
+"0","students_dummies_final <- dummy_cols(students_dummies_final, select_columns = ""Parents_Education"")"

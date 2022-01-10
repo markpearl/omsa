@@ -1,0 +1,1 @@
+{"frames":[{"func":"select(students_dummies_final, -contains(\"Medu\"))","file":"","line_number":0,"end_line_number":0,"character_number":0,"end_character_number":0}],"message":"Error in UseMethod(\"select\") : \n  no applicable method for 'select' applied to an object of class \"data.frame\"\n"}

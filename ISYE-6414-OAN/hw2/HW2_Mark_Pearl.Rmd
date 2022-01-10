@@ -1,0 +1,205 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Peer Grader Guidance
+Please review the student expectations for peer review grading and peer review comments.  Overall, we ask that you score with accuracy. When grading your peers, you will not only learn how to improve your future homework submissions but you will also gain deeper understanding of the concepts in the assignments. When assigning scores, consider the responses to the questions given your understanding of the problem and using the solutions as a guide. Moreover, please give partial credit for a concerted effort, but also be thorough. **Add comments to your review, particularly when deducting points, to explain why the student missed the points.** Ensure your comments are specific to questions and the student responses in the assignment.
+
+
+# Background
+
+You have been contracted as an automobile consulting company to understand the factors on which the pricing of cars depends. 
+
+## Data Description
+
+The data consists of a data frame with 205 observations on the following 8 variables:
+
+1. price: Response variable ($)
+1. fueltype: Qualitative variable
+1. carbody: Qualitative variable
+1. carlength: Quantitative variable
+1. enginesize: Quantitative variable 
+1. horsepower: Quantitative variable
+1. peakrpm: Quantitative variable
+1. highwaympg: Quantitative variable
+
+## Instructions on reading the data
+
+To read the data in `R`, save the file in your working directory (make sure you have changed the directory if different from the R working directory) and read the data using the `R` function `read.csv()`
+
+```{r CP data}
+CP = read.csv("C:/Users/mjpearl/Desktop/omsa/ISYE-6414-OAN/hw2/carprice.csv", head = TRUE)
+head(CP)
+```
+
+# Question 1: Exploratory Data Analysis [12 points]
+
+a. **3 pts** Create plots of the response, *price*, against three quantitative predictors (for simplicity) *carlength*, *enginesize*, and *horsepower*. Describe the general trend (direction and form) of each plot. 
+```{r Plot for Price against Car Length}
+plot(CP$carlength,CP$price)
+```
+
+```{r Plot for Price against Engine Size}
+plot(CP$enginesize,CP$price)
+```
+
+```{r Plot for Price against Horse Power}
+plot(CP$horsepower,CP$price)
+```
+
+b. **3 pts** What is the value of the correlation coefficient for each of the above pair of response and predictor variables? What does it tell you about your comments in part (a).
+```{r lm1}
+lm1 <- lm(CP$price~CP$carlength)
+summary(lm1)
+```
+```{r lm2}
+lm2 <- lm(CP$price~CP$horsepower)
+summary(lm2)
+```
+
+```{r lm3}
+lm3 <- lm(CP$price~CP$enginesize)
+summary(lm3)
+```
+
+When taking the individual linear regression results for each variable individually, we can see the correlation against the target variable is the following:
+
+Car Length = 0.4638 
+Horse Power = 0.6514 
+Engine Size = 0.763
+
+We can see that with each variable that the level of correlation increased as we start to get to the Engine Size variable. 
+
+Car Length does not seem to exhibit that much correlation with price, which makes sense since there's a much higher population of cars with modest to small lengths that are much more expensive than the longer sedans / trucks currently on the market. 
+
+The other variables Horse Power and Engine Size seem to exhibit a strong positive correlation, which makes sense due to our capitalists culture's preference to powerful / fast cars that come at a higher price point.
+
+c. **3 pts** Create box plots of the response, *price*, and the two qualitative predictors *fueltype*, and *carbody*. Based on these box plots, does there appear to be a relationship between these qualitative predictors and the response?
+```{r boxplot Price against Fuel Type and Carbody}
+boxplot(price~fueltype,data=CP)
+```
+```{r boxplot Price against Fuel Type and Carbody -2}
+boxplot(price~carbody,data=CP)
+```
+
+
+d. **3 pts** Based on the analysis above, does it make sense to run a multiple linear regression with all of the predictors?
+ 
+Based on our results, it's evident that we're going to need to use more than just the variables above in order to account for all of the noise when predicting a car price. This makes sense, as there's quite a few features that consumers will look for when trying to buy a new vehicle, not just 1-3 features. We see strong correlation with some features, but based on the size of our dataset, we don't need to worry about filtering the number of predictors used in order to reduce the amount of training time.
+
+Utilizing more features in this case will increased our overall R^2 of the model and lead to better predictions so long as we try and avoid overfitting as best as we can. 
+
+From our boxplot, we can see that gas powered vehicles, contains several outliers past the 3rd quartile, but this makes sense as luxury cars at a higher pricepoint represent a smaller % of the population of cars since not all consumers can afford them. Those cars also tend to be classified as sedans a lot of the time, so this makes sense that we're seeing outliers for the carbody type of Sedan.
+
+From our results, it's justified for us to use a multiple linear regression model to predict price.
+
+
+*Note: Please work on non-transformed data for all of the following questions.*
+
+# Question 2: Fitting the Multiple Linear Regression Model [10 points]
+
+Build a multiple linear regression model, named *model1*, using the response, *price*, and all 7 predictors, and then answer the questions that follow:
+
+a. **5 pts** Report the coefficient of determination for the model and give a concise interpretation of this value.
+```{r model1}
+model1 <- lm(CP$price ~ CP$fueltype + CP$carbody + CP$carlength + CP$enginesize + CP$horsepower + CP$peakrpm + CP$highwaympg)
+```
+
+
+b. **5 pts** Is the model of any use in predicting price? Conduct a test of overall adequacy of the model, using $\alpha = 0.05$. Provide the following elements of the test: null hypothesis $H_0$, alternative hypothesis $H_a$, F- statistic or p-value, and conclusion.
+```{r model1 summary}
+summary(model1)
+```
+
+
+# Question 3: Model Comparison [12 points]
+
+a. **4 pts** Assuming a marginal relationship between the car's body type and its price, perform an ANOVA F-test on the means of the car's body types. Using an $\alpha-level$ of 0.05, can we reject the null hypothesis that the means of the car body types are equal? Please interpret.
+```{r model1 anova}
+summary(aov(price ~ carbody, data=CP))
+```
+H0: There are not equal means for each group representing the carbody types and price (u1 != u2)
+HA: There are equal means for the two groups representing carbody types and price (u1 = u2)
+
+Based on the p-value of 0.00000503, we reject the null hypothesis that the mean are equal since the p-value is much smaller than the
+alpha level of 0.05. This means we can conclude that the carbody type does have an impact on the price.
+
+
+b. **4 pts** Now, build a second multiple linear regression model, called *model2*, using *price* as the response variable, and all variables except *carbody* as the predictors. Conduct a partial F-test comparing *model2* with *model1*. What is the partial-F test p-value? Can we reject the null hypothesis that the regression coefficients for *carbody* are zero at $\alpha-level$ of 0.05?
+
+```{r model2 fit}
+model2 <- lm(CP$price ~ CP$fueltype + CP$carlength + CP$enginesize + CP$horsepower + CP$peakrpm + CP$highwaympg)
+summary(model2)
+```
+
+```{r model2 anova}
+model2 <- lm(CP$price ~ CP$fueltype + CP$carlength + CP$enginesize + CP$horsepower + CP$peakrpm + CP$highwaympg)
+anova(model2,model1)
+```
+
+Based on the result of our p-value of 0.002, we will reject the null hypothesis which means that the model with the variable included is better. 
+
+c. **4 pts** What can you conclude from a and b? Do they provide the exact same results?  
+Yes, based on our results, we've rejected the null hypothesis in both scenarios since we've concluded that the carbody has an impact
+on the carpice.
+
+
+# Question 4: Coefficient Interpretation [6 points]
+
+a. **3 pts** Interpret the estimated coefficient of *fueltypegas* in the context of the problem. *Mention any assumption you make about other predictors clearly when stating the interpretation.*
+
+CP$fueltypegas -4.099e+03  9.862e+02  -4.156 4.81e-05 ***
+
+Based on the result of our model, we can see based on a p-value of 0.0000481 that is < 0.05, and we can conclude that is 
+statistically significant for predicting the target variable price.
+
+When converting the scientific notation, the results in a value of 99. Meaning that an increase in one unit of price accounts for a 99 unit increase in the fueltypegas variable.
+
+b. **3 pts** If the value of the *enginesize* in the above model is increased by 0.01 keeping other predictors constant, what change in the response would be expected?
+
+Our value of the coefficient 1.145e+02 translates to a real number of 114.5. Taking 114.5 * 0.01 = 1.45 unit increase in the price variable.
+ 
+# Question 5: Confidence and Prediction Intervals [10 points]
+
+a. **5 pts** Compute 90% and 95% confidence intervals (CIs) for the parameter associated with *carlength* for the model in Question 2. What observations can you make about the width of these intervals?
+```{r 0.90 confidence interval}
+confint(model1,level=0.90)
+```
+
+```{r 0.95 confidence interval}
+confint(model1,level=0.99)
+```
+
+Confint(90%): CP$carlength            30.932219   160.355997
+Confint(99.5%): CP$carlength        -6.211880e+00   197.500095
+
+We can see that the width for the 99.5 confidence interval is obviously much wider. But more importantly, the 90 confidence interval does not include 0 within the range. If 0 is within the range then this means that the variable has the posibility of not being statistically significant. In our case it doesn't include 0 for a critical value of 0.9, thus there's a high chance it will be statistically significant. 
+
+b. **2.5 pts** Using *model1*, estimate the average price for all cars with the same characteristics as the first data point in the sample. What is the 95% confidence interval for this estimation? Provide an interpretation of your results.
+```{r prediction function}
+newdata = CP[1,]
+predict(model1,newdata,interval="confidence")
+```
+1   17565.194 14885.3674 20245.0205
+
+This is the result of the prediction interval meaning the following:
+
+fitted value = 17565.19
+lower bound = 14885.37
+upper bound = 20245.02
+
+
+c. **2.5 pts** Suppose that the *carlenght* value for the first data point is increased to 200, while all other values are kept fixed. Using *model1*, predict the price of a car with these characteristics. What is the 95% prediction interval for this prediction? Provide an interpretation of your results.
+```{r new value prediction, increase in carlength by 200 units} 
+summary(model1)
+```
+Since the fitted value for the regression line of the first observation is 17565.19, and the new coefficient value for the carlength variable is 295.64. We can predict the impact of this variable. With 95.64 as the original coefficient value, 168.8	* 95.64 = 16144.03 is the original value for the coefficient B1 * X11. Now with the new coefficient value, the total is 200 * 95.64 = 19128. Therefore the impact on the target variable is 2983.97 $ in the target variable price.
+```{r}
+CP[1,]
+```

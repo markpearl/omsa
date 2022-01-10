@@ -1,0 +1,8 @@
+"0","# Ridge"
+"0","y_lasso = predict(lasso, as.matrix(X_train), s = lambda_lasso)"
+"0","mse_lasso = sum((y_test-y_lasso)^2)/nrow(X_test)"
+"0","mse_lasso"
+"1","[1]"
+"1"," 0.198589"
+"1","
+"

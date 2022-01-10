@@ -1,0 +1,8 @@
+"0","# Ridge"
+"0","y_ridge = predict(ridge, as.matrix(X_train), s = lambda_ridge)"
+"0","mse_ridge = sum((y_test-y_ridge)^2)/nrow(X_test)"
+"0","mse_ridge"
+"1","[1]"
+"1"," 0.166483"
+"1","
+"

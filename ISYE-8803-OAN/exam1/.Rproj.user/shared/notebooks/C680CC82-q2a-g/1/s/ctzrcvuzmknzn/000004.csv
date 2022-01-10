@@ -1,0 +1,1 @@
+"0","hist( x = linear, breaks = 256, xlab = '', ylab = '',ylim= c(0,20000), main='Histogram for Negative/Linear Transformation')"

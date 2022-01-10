@@ -1,0 +1,201 @@
+---
+title: "exam1-q3"
+author: "Mark Pearl"
+date: "6/28/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r tensor read in images}
+library(imager)
+library(pracma)
+library(R.matlab)
+library(cluster)    
+library(factoextra)
+library(profvis)
+library(magick)
+#install.packages("BiocManager")
+#BiocManager::install("EBImage")
+library(EBImage)
+```
+
+```{r q four a}
+create_tensor = function(num_of_images, dataset_name) {
+  matrix_array = array(dim=c(180,150,3,num_of_images))
+  for (i in seq(1:num_of_images)){ 
+  image = load.image(paste0("./",dataset_name,"/",dataset_name,i,".jpg"))
+  for (channel in seq(1:3)){
+    channel_image = image[,,,channel]
+    matrix_array[,,channel,i]=channel_image
+    }
+  }
+  return(as.tensor(matrix_array))
+}
+  
+tensor_train = create_tensor(100,'Train')
+tensor_test  = create_tensor(40, 'Test')
+```
+
+
+```{r 4b train}
+T <- tucker(tensor_train, ranks =c(15,15,3,100), max_iter = 50, tol = 1e-07)
+B <-  T$U[[4]]
+
+x_bar = ttm(T$Z,B,m=4)
+
+
+
+create_dataset = function(num_of_images, tensor_dataset) {
+  matrix_array = matrix(ncol=length(vec(tensor_dataset[,,,1])),nrow=num_of_images)
+  for (i in seq(1:num_of_images)){
+    matrix_array[i,]=vec(tensor_dataset[,,,i])
+  }
+  return(matrix_array)
+}
+
+train_4b = create_dataset(100,x_bar)
+```
+
+
+```{r 4b test}
+test <- tucker(tensor_test, ranks =c(15,15,3,40), max_iter = 50, tol = 1e-07)
+A1 <- test$U[[1]]
+A2 <- test$U[[2]]
+A3 <- test$U[[3]]
+
+s_bar = ttm(ttm(ttm(tensor_test,t(A1),m=1),t(A2),m=2),t(A3),m=3)
+
+test_4b = create_dataset(40,s_bar)
+```
+
+```{r}
+library(randomForest)
+library(readr)
+library(caret)
+library(e1071)
+#Read in labels for the images
+labels_train <- read_csv('./labels_train.csv', col_names = "label", skip = 1)
+rf_4b <- randomForest(y=factor(labels_train$label),x=train_4b)
+preds <- predict(rf_4b,test_4b)
+labels_test <- read_csv('./labels_test.csv', col_names = "label", skip = 1)
+actuals <- labels_test$label
+confusionMatrix(factor(preds),factor(actuals))
+```
+
+```{r 4c train}
+T <- tucker(tensor_train, ranks =c(5,5,3,100), max_iter = 50, tol = 1e-07)
+B <-  T$U[[4]]
+
+x_bar = ttm(T$Z,B,m=4)
+train_4c = create_dataset(100,x_bar)
+```
+
+```{r 4c test}
+test <- tucker(tensor_test, ranks =c(5,5,3,40), max_iter = 50, tol = 1e-07)
+A1 <- test$U[[1]]
+A2 <- test$U[[2]]
+A3 <- test$U[[3]]
+
+s_bar = ttm(ttm(ttm(tensor_test,t(A1),m=1),t(A2),m=2),t(A3),m=3)
+
+test_4c = create_dataset(40,s_bar)
+```
+
+```{r 4c }
+#Read in labels for the images
+rf_4c <- randomForest(y=factor(labels_train$label),x=train_4c)
+preds <- predict(rf_4c,test_4c)
+confusionMatrix(factor(preds),factor(actuals))
+```
+
+```{r 4d}
+create_grayscale = function(num_of_images, dataset_name) {
+  matrix_array = array(dim=c(180,150,num_of_images))
+  for (i in seq(1:num_of_images)){
+    image = load.image(paste0("./",dataset_name,"/",dataset_name,i,".jpg"))
+    matrix_array[,,i]=grayscale(image)
+    }
+  return(as.tensor(matrix_array))
+}
+
+tensor_train_grayscale <- create_grayscale(100,'Train')
+tensor_test_grayscale  = create_grayscale(40, 'Test')
+```
+
+```{r 4e train}
+T <- tucker(tensor_train_grayscale, ranks =c(15,15,100), max_iter = 50, tol = 1e-07)
+B <-  T$U[[3]]
+
+create_dataset_grayscale = function(num_of_images, tensor_dataset) {
+  matrix_array = matrix(ncol=length(vec(tensor_dataset[,,1])),nrow=num_of_images)
+  for (i in seq(1:num_of_images)){
+    matrix_array[i,]=vec(tensor_dataset[,,i])
+  }
+  return(matrix_array)
+}
+
+x_bar = ttm(T$Z,B,m=3)
+train_4e = create_dataset_grayscale(100,x_bar)
+```
+```{r 4e test}
+test <- tucker(tensor_test_grayscale, ranks =c(15,15,40), max_iter = 50, tol = 1e-07)
+A1 <- test$U[[1]]
+A2 <- test$U[[2]]
+
+s_bar = ttm(ttm(tensor_test_grayscale,t(A1),m=1),t(A2),m=2)
+
+test_4e = create_dataset_grayscale(40,s_bar)
+```
+
+```{r 4e grayscale confusion matrix }
+#Read in labels for the images
+rf_4c <- randomForest(y=factor(labels_train$label),x=train_4e)
+preds <- predict(rf_4c,test_4e)
+confusionMatrix(factor(preds),factor(actuals))
+```
+
+
+```{r 4f train}
+T <- tucker(tensor_train_grayscale, ranks =c(5,5,100), max_iter = 50, tol = 1e-07)
+B <-  T$U[[3]]
+
+x_bar = ttm(T$Z,B,m=3)
+train_4f = create_dataset_grayscale(100,x_bar)
+```
+
+```{r 4f test}
+test <- tucker(tensor_test_grayscale, ranks =c(5,5,40), max_iter = 50, tol = 1e-07)
+A1 <- test$U[[1]]
+A2 <- test$U[[2]]
+
+s_bar = ttm(ttm(tensor_test_grayscale,t(A1),m=1),t(A2),m=2)
+
+test_4f = create_dataset_grayscale(40,s_bar)
+```
+
+
+```{r 4f grayscale confusion matrix }
+#Read in labels for the images
+rf_4c <- randomForest(y=factor(labels_train$label),x=train_4f)
+preds <- predict(rf_4c,test_4f)
+confusionMatrix(factor(preds),factor(actuals))
+```
+
+
+From the results we can see that when we run Tensor Decomposition on the RGB images with a rank of 15,15,3 and 100. We achieve an accuracy of approximately 75%. However when we reduce the rank to 5,5,3 and 100, we see a dramatic jump to approximately 93%. This is very much due to the increase in feature space from 675 features down to 75 features whenever ran with the latter rank combinations. This is likely causing overfitting in the data which is causing poor performance against the test dataset. This is likely because using a rank of 5,5,3 and 100 likely results in an SVD decomposition for the basis matrices that accounts for a majority of the variance when predicting against the target variable, and as another benefit also reduces fit time and convergence for the tensor decomposition since the feature space is smaller. 
+
+Exact same can be said for grayscale images, however we do see quite a bit of decline when looking at the accuracy of grayscale which is 50 and 55% accuracy, respectively. This drop in accuracy is likely due to a lot of features related to color that are captured in the feature space, which makes absolute sense since we're predicting weather conditions! 
+
+
+

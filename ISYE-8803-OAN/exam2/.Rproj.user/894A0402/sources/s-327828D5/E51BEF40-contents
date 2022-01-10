@@ -1,0 +1,159 @@
+---
+title: "exam2_q4"
+author: "Mark Pearl"
+date: "8/3/2021"
+output: html_document
+---
+
+```{r setup}
+library(R.matlab) 
+library(matlab)
+```
+
+
+```{r import data}
+#Read in the matrix files
+random_miss <- read.csv('./RandomMiss.csv',header=FALSE)
+colnames(random_miss) <- c(paste0("X_", 1:100))
+random_miss <- as.matrix(random_miss)
+non_random_miss <- read.csv('./NonRandomMiss.csv',header=FALSE)
+colnames(non_random_miss) <- c(paste0("X_", 1:100))
+non_random_miss <- as.matrix(non_random_miss)
+original <- read.csv('./Original.csv',header=FALSE)
+colnames(original) <- c(paste0("X_", 1:100))
+original <- as.matrix(original)
+```
+
+```{r run nonrandommiss}
+n1 <- 100
+n2 <- 100
+A <- as.matrix(non_random_miss)
+r <- 2
+decomp <- svd(A)
+U <- decomp$u
+s <- decomp$d
+V <- decomp$v
+
+s[(r+1): length(s)] <- 0
+S <-diag(s)
+
+#svd decomp 
+X <- U %*% S %*% t(V)
+X0 <- X
+
+missing_observations <-which(A==0)
+A <- ifelse(A == 0, TRUE, FALSE)
+X[A]<-0
+m <- sum(sum(A==0))
+
+# Initialization
+Y <- matrix(0,n1,n2)
+delta <- (n1*n2)/m
+lambda <- 5
+tau <- delta*lambda
+# Iterations
+vec <- rep(0,500)
+err <- rep(0,500)
+for (i in 1:500){
+  decomp <- svd(Y)
+  U <- decomp$u
+  S <- decomp$d
+  V <- decomp$v
+  S_t <- S-tau
+  S_t[S_t<0] <- 0
+  Z_nonrandom <- U%*%diag(S_t)%*%t(V) 
+  P <- X-Z_nonrandom
+  P[A] <- 0
+  Y0 <- Y
+  Y <- Z_nonrandom + delta*P
+  vec[i] <- sum(sum((Y-Y0)^2))
+  err[i] <- sum(sum((X0-Z_nonrandom)^2))/sum(sum((X0)^2))
+}
+plot(vec,type="l")
+plot(err,type="l")
+Ar <- as.vector(A)
+Xr <- as.vector(original)
+Xr_nonrandom <- Xr[Ar]
+Zr <- as.vector(Z_nonrandom)
+Zr_nonrandom <- Zr[Ar]
+#dev.off()
+par(mfrow=c(1,2))
+plot(Xr_nonrandom,type="l")
+lines(Zr_nonrandom, col="red",lty=2)
+plot(Xr_nonrandom-Zr_nonrandom,type="l")
+#dev.off()
+par(mfrow=c(1,2))
+imagesc(Z_nonrandom, main ="M")
+imagesc(original, main ="M0")
+```
+
+```{r randommiss data}
+n1 <- 100
+n2 <- 100
+A <- as.matrix(random_miss)
+r <- 2
+decomp <- svd(A)
+U <- decomp$u
+s <- decomp$d
+V <- decomp$v
+
+s[(r+1): length(s)] <- 0
+S <-diag(s)
+
+#svd decomp 
+X <- U %*% S %*% t(V)
+X0 <- X
+
+missing_observations <-which(A==0)
+A <- ifelse(A == 0, TRUE, FALSE)
+X[A]<-0
+m <- sum(sum(A==0))
+
+# Initialization
+Y <- matrix(0,n1,n2)
+delta <- (n1*n2)/m
+lambda <- 5
+tau <- delta*lambda
+# Iterations
+vec <- rep(0,500)
+err <- rep(0,500)
+for (i in 1:500){
+  decomp <- svd(Y)
+  U <- decomp$u
+  S <- decomp$d
+  V <- decomp$v
+  S_t <- S-tau
+  S_t[S_t<0] <- 0
+  Z_random <- U%*%diag(S_t)%*%t(V) 
+  P <- X-Z_random
+  P[A] <- 0
+  Y0 <- Y
+  Y <- Z_random + delta*P
+  vec[i] <- sum(sum((Y-Y0)^2))
+  err[i] <- sum(sum((X0-Z_random)^2))/sum(sum((X0)^2))
+}
+plot(vec,type="l")
+plot(err,type="l")
+Ar <- as.vector(A)
+Xr <- as.vector(original)
+Xr_random <- Xr[Ar]
+Zr <- as.vector(Z_random)
+Zr_random <- Zr[Ar]
+#dev.off()
+par(mfrow=c(1,2))
+plot(Xr_random,type="l")
+lines(Zr_random, col="red",lty=2)
+plot(Xr_random-Zr_random,type="l")
+#dev.off()
+par(mfrow=c(1,2))
+imagesc(Z_random, main ="M")
+imagesc(original, main ="M0")
+```
+```{r original vs other images}
+par(mfrow=c(1,3))
+imagesc(Z_random, main ="Z_random")
+imagesc(Z_nonrandom, main ="Z_nonrandom")
+imagesc(original, main ="Original")
+summary(Zr_random)
+summary(Zr_nonrandom)
+```

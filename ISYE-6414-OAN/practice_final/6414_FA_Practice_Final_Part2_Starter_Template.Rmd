@@ -1,0 +1,374 @@
+---
+title: "Practice Final Part2"
+output:
+  pdf_document: default
+  html_document: null
+date: "Summer Semester 2020"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
+options(tinytex.verbose = TRUE)
+```
+
+## Instructions
+
+This R Markdown file includes the questions, the empty code chunk sections for your code, and the text blocks for your responses. Answer the questions below by completing the R Markdown file. You must answer the questions using this file. You can change the format from pdf to Word or html and make other slight adjustments to get the file to knit but otherwise keep the formatting the same. Once you've finished answering the questions, submit your responses in a single knitted file (just like the homework peer assessments).
+
+Partial credit may be given if your code is correct but your conclusion is incorrect or vice versa.
+
+*Next Steps:*
+
+1.  Save this `.Rmd` file in your `R` working directory - the same directory where you will download the `atlanta_flights.csv` and `echo.csv` data files into. Having all files in the same directory will help in reading the `.csv` file.
+
+2.  Read the question and create the R code necessary within the code chunk section immediately below each question. Knitting this file will generate the output and insert it into the section below the code chunk. 
+
+3.  Type your answer to the questions in the text block provided immediately after the response prompt: **This is how the response prompt will be formatted**. 
+
+4.  Once you've finished answering all questions, knit this file and submit the knitted file on Canvas.
+
+
+*Example Question Format:*
+
+(1a) This will be the exam question - each question is already copied from Canvas and inserted into individual text blocks below, *you do not need to copy/paste the questions from the online Canvas exam.*
+
+```{r}
+# Example code chunk area. Enter your code below the comment`
+
+
+```
+
+**Response to question (1a)**:
+This is the section where you type your written answers to the question. Depending on the question asked, your typed response may be a number, a list of variables, a few sentences, or a combination of these elements. 
+
+
+
+**Ready? Let's begin.**
+
+# Part 1: Multiple Linear Regression
+
+## Data Set Background
+
+The data analyzed in the first part of the exam came from a sample of flights leaving the Atlanta Airport in the year 2015.
+
+The **response variable** is ‘DEPARTURE_DELAY’ which is a continuous variable indicating the number of minutes a flight was delayed -- note that there are negative values, indicating that the flight in question actually departed early.
+
+The **predicting variables** are as follows:
+
+* DAY_OF_WEEK -- integer value for day of the week (Sunday=1, Monday=2, …, Saturday=7)
+
+* AIRLINE -- factor variable for each airline (AA = American Airlines, AS = Alaska Airlines, DL = Delta, F9 = Frontier Airlines,  MQ = American Eagle, NK = Spirit Airlines, OO = SkyWest Airlines, UA = United Airlines, US = US Airways, WN = Southwest Airlines)
+
+* DESTINATION_AIRPORT -- factor variable for destination airport (unique 3 letter code for each airport; ie ATL is Atlanta, SFO is San Francisco, LGA is LaGuardia)
+
+* SCHEDULED_DEPARTURE -- scheduled departure time, in military time as HHMM (so 1:45pm will appear as 1345)
+
+* SCHEDULED_ARRIVAL -- scheduled arrival time, in military time as HHMM (so 1:45pm will appear as 1345)
+
+* DISTANCE -- distance of flight in miles
+
+## Read Data
+
+Read the data and answer the questions below. Assume a *significance threshold of 0.05* for hypothesis tests.
+
+```{r}
+# Read the data set
+atlanta_flights = read.csv('atlanta_flights.csv', header=TRUE, sep=",")
+
+# Viewing first few rows of data
+head(atlanta_flights)
+
+```
+
+## Short Answer Questions
+
+### Question 1: Multiple Linear Regression Model Fitting
+
+Fit a model named *model1* with the following explanatory variables: DAY_OF_WEEK, DISTANCE, AIRLINE, DESTINATION_AIRPORT, SCHEDULED_DEPARTURE, SCHEDULED_ARRIVAL. What is the resulting coefficient of determination? What variable(s) might be excluded to reduce the complexity of the model? 
+
+```{r}
+# Code to create model1
+model1 <- lm(DEPARTURE_DELAY~DAY_OF_WEEK+DISTANCE+AIRLINE+DESTINATION_AIRPORT+SCHEDULED_DEPARTURE+SCHEDULED_ARRIVAL,data=atlanta_flights)
+summary(model1)
+```
+
+**Response to Question 1**: 
+
+The resulting coefficient of determination is 0.1339, meaning that the model is significant overall. 
+
+Based on having a signficant number of categorical features for the Destination airports and the airline, we should be able to to remove some of these coefficient values to help reduce the complexity of the model. Another approach could be to bin the airports based on a higher geographic attribute such as the state/province or even country of the airport. 
+
+
+
+### Question 2: Stepwise Variable Selection
+
+Use the step function to perform a stepwise model selection minimizing AIC (using direction = “both”) on model1. What variables are selected? 
+
+```{r}
+# Code to perform stepwise variable selection ...
+minimum = lm(DEPARTURE_DELAY ~ 1, data=atlanta_flights)
+step = step(model1, scope=list(lower=minimum,upper=model1), direction="both",k=2, trace=FALSE)
+step
+```
+
+**Response to Question 2**:
+We can see based from our result that the selected variables are DAY_OF_WEEK, AIRELINE, DESTINATION_AIRPORT and SCHEDULED_DEPARTURE. This means that the DISTANCE, and SCHEDULED_ARRIVAL were not selected as part of the model.
+
+### Question 3 - Recreate Model after Variable Selection 
+
+Create a model named *model2* using these variables selected from stepwise model selection. Did the adjusted R-squared value increase?
+
+```{r}
+# Code to create model2...
+model2 = lm(DEPARTURE_DELAY~DAY_OF_WEEK+AIRLINE+DESTINATION_AIRPORT+SCHEDULED_DEPARTURE,data=atlanta_flights)
+summary(model2)
+```
+
+**Response to Question 3**:
+
+Adjusted R2 Model1: 0.1122
+Adjusted R2 Model2: 0.1122
+
+Based on our result we can see the adjusted R2 did not improve for the model.
+
+### Question 4 - Outlier Analysis
+
+Use Cook's distance on *model2* to detect outliers in the data, and remove any observations you may have found with Cook's distance greater than 1. Provide the commands used to calculate Cook's distance and remove any points from the data.
+
+```{r}
+# Code to perform outlier analysis using Cook's distance...
+cook = cooks.distance(model2)
+plot(cook,type="h",lwd=3,col='red',ylab = "Cook's Distance")
+```
+
+**Response to Question 4**:
+
+```{r}
+cook[cook>1]
+removeRows <- function(rowNum, data) {
+      newData <- data[-rowNum, , drop = FALSE]
+      rownames(newData) <- NULL
+      newData
+}
+atlanta_flights2 <- removeRows(578,atlanta_flights)
+```
+
+
+
+### Question 5 - Recreate the model after Variable Seletion and Outlier Removal
+
+Fit a model named *model3* using the variables selected with stepwise model selection, and excluding any points you may have removed in the previous problem. Provide the R commands and the resulting residual standard error and corresponding degree of freedom for your model.  Which variables are statistically significant at the 0.01 significance level?  What is the sum of squared error for this model?  What percentage of variation in the response is explained by the predicting variables used?
+
+```{r}
+# Code to create model3...
+model3 = lm(DEPARTURE_DELAY~DAY_OF_WEEK+AIRLINE+DESTINATION_AIRPORT+SCHEDULED_DEPARTURE,data=atlanta_flights2)
+summary(model3)
+```
+ Provide the R commands and the resulting residual standard error and corresponding degree of freedom for your model.  Which variables are statistically significant at the 0.01 significance level?  What is the sum of squared error for this model?  What percentage of variation in the response is explained by the predicting variables used?
+
+**Response to Question 5**:
+
+```{r}
+# Code to perform Goodness of Fit Analysis...
+names(which(summary(model3)$coefficients[,4]<.01))
+sum(model3$residuals^2)
+```
+Residual standard error: 25.56 on 6716 degrees of freedom
+Given the R2 of 0.1211, we know that 12% of variation in the model is explained by our variables. 
+SSE = 4387276
+Significant coefficients at alpha level 0.01= "DAY_OF_WEEK","AIRLINEDL","DESTINATION_AIRPORTBTV","DESTINATION_AIRPORTFWA","SCHEDULED_DEPARTURE"
+
+### Question 6 - Goodness of Fit
+
+Check the model assumptions from *model3* using the appropriate plots. Provide the resulting plots. What can you conclude about this model? 
+
+```{r}
+# Code to perform Goodness of Fit Analysis...
+#Check Linearity Assumptions
+par(mfrow=c(1,2))
+plot(atlanta_flights2$SCHEDULED_DEPARTURE,model3$residuals,xlab= "SCHEDULED_DEPARTURE", ylab = "S. Residuals")
+abline(lm(model3$residuals~atlanta_flights2$SCHEDULED_DEPARTURE, data=atlanta_flights2), col="red")
+lines(lowess(atlanta_flights2$SCHEDULED_DEPARTURE, model3$resids), col='blue')
+
+plot(atlanta_flights2$DAY_OF_WEEK,model3$residuals,xlab= "DAY_OF_WEEK", ylab = "S. Residuals")
+abline(lm(model3$residuals~atlanta_flights2$DAY_OF_WEEK, data=atlanta_flights2), col="red")
+lines(lowess(atlanta_flights2$DAY_OF_WEEK, model3$resids), col='blue')
+```
+```{r}
+# Code to perform Goodness of Fit Analysis...
+#Check Linearity Assumptions
+plot(model3$fitted.values,model3$residuals,xlab="Fitted Values", ylab=" S. Residuals")
+lines(lowess(model3$fitted.values, model3$residuals), col='blue')
+abline(h=0, col="red")
+```
+```{r}
+# Code to perform Goodness of Fit Analysis...
+#Check Linearity Assumptions
+par(mfrow=c(1,2))
+hist(model3$residuals)
+qqPlot(model3$residuals)
+```
+
+**Response to Question 6**:
+Linearity Assumption: Based on the data containing different levels and it's not a continous variable, for linearity we need to assess whether or not any significant groups are forming across each value for the predicting variable. We can see for each observed value that the data seems to be well spreadout, and therefore we can assume that our lineary assumption holds. 
+
+Constant Variance: We can see from the plot of our fitted values against our standardized residuals that the variance seems to remain constant throughout and is not forming any U or V shapes when looking at the output. 
+
+Normality Assumption: Based on our result we can see signficant skewness for the right tail of our histrogram on the residuals, which is also matches up when looking at the results of our qqplot. 
+
+Therefore, we can assume that the model is not a good fit on the data as our assumptions do not hold for all factors. 
+
+### Question 7 - Confidence Interval
+
+What is the 99% confidence interval for the estimated regression coefficient for day of the week?  
+```{r}
+confint(model3,"DAY_OF_WEEK",level=0.99)
+```
+
+**Response to Question 7**:
+
+               0.5 %       99.5 %
+DAY_OF_WEEK -0.9302243 -0.007901542
+
+
+### Question 8 - Conclusion
+
+What can you infer about the reliability of *model3*? What can you conclude about flight delays at the Atlanta airport based on this information?
+
+**Response to Question 8**:
+
+
+
+
+
+### Question 9 - Suggestions
+
+What are your suggestions or curiosities about other potential ways to model flight delays 
+at the Atlanta airport?
+
+**Response to Question 9**:
+
+Based on the data we're dealing with, we're looking at the use of rate/ event data happening in a given time sequence. This is the perfect use case for fitting the data with a glm model using poisson regression. This will allow us to fit the response variable against a better distribution, as it's clear that the data is better to be modelled against a non-linear transformation. 
+
+
+
+
+# Part 2: Logistic Regression
+
+## Data Set Background
+
+The data analyzed in the second part of the exam came from medical patients who have suffered from a heart attack within the past year. 
+
+The **response variable** is ‘still_alive’ which is a binary variable indicating if the patient is still living or not (0=dead, 1=alive).
+
+The **predicting variables** are as follows:
+
+*survival -- the number of months a patient survived (has survived, if patient is still alive).  
+
+*age -- age in years when heart attack occurred 
+
+*pericardial-effusion -- Pericardial effusion is fluid around the heart. This is a binary variable: 0=no fluid, 1=fluid. 
+
+*fractional-shortening -- a measure of contracility around the heart. Lower numbers are increasingly abnormal
+
+*lvdd -- left ventricular end-diastolic dimension. This is a measure of the size of the heart at end-diastole. Large hearts tend to be sick hearts.  
+
+## Read Data
+
+Read the data and answer the questions below. Assume a *significance threshold of 0.05* for hypothesis tests.
+
+```{r}
+# Read the data set
+echo = read.csv('echo.csv', header=TRUE, sep=",")
+
+# Viewing first few rows of data
+head(echo)
+
+```
+
+## Short Answer Questions
+
+### Question 1: Exploratary Analysis
+
+Plot the boxplots to describe the relationship between the response (still_alive) and the following predicting variables: age, survival, fractional_shortening, and lvdd. Provide the R code and plots generated.
+
+```{r}
+# Code to create the boxplots...
+par(mfrow=c(1,4))
+boxplot(echo$age~echo$still_alive,xlab="age", ylab="still alive")
+boxplot(echo$survival~echo$still_alive,xlab="survival", ylab="still alive")
+boxplot(echo$fractional_shortening~echo$still_alive,xlab="fractional_shortening", ylab="still alive")
+boxplot(echo$lvdd~echo$still_alive,xlab="lvdd", ylab="still alive")
+```
+
+**Response to Question 1**: 
+
+
+### Question 2: Model Fitting
+
+Create a model using the following predicting variables: age, fractional_shortening, and lvdd (exclude survival due to potential multicollinearity with the response variable, ‘still_alive’). What are the model parameters and what are their estimates? Which of them are statistically significant at the 95% confidence level? 
+
+```{r}
+# Code to create the logistic model...
+glm_model <- glm(still_alive~age+fractional_shortening+lvdd, data=echo, family="binomial")
+summary(glm_model)
+```
+```{r}
+# Code to create the logistic model...
+names(which(summary(glm_model)$coefficients[,4]<0.05))
+```
+
+**Response to Question 2**:
+Paramater
+Age = A one unit increase in age decreases the log odds of survival by 0.08984
+Fractional= A one unit increase in fractional increases the log odds of survival by 5.90295
+lvdd= A one unit increase in lvdd decreases the log odds of survival by 0.65886
+
+All variables are statistically significant at alpha= 0.05. 
+
+
+
+
+### Question 3: Parameter Interpretation
+Interpret the estimated value of the parameter corresponding to *age* in the context of this problem.
+
+**Response to Question 3**:
+
+Age = A one unit increase in age decreases the log odds of survival by 0.08984
+
+For a one unit increase in age, the odds of still alive change by a factor of 0.91, holding all other variables constant. 
+
+
+### Question 4: Model Equation
+
+Provide the equation for the estimated logit transformation of the probability of still being alive given the predicting variables. 
+
+**Response to Question 4**:
+
+
+
+### Question 5: Parameter Interpretation 2
+How does the log-odds change with a 1 unit increase in fractional_shortening, holding all other variables constant?  
+
+**Response to Question 5**:  
+Fractional= A one unit increase in fractional increases the log odds of survival by 5.6610
+
+### Question 6: Deviances
+What is the null deviance and its degree of freedom?  What is the approximated distribution of residual deviance?  What is the AIC for your model?
+
+```{r}
+par(mfrow=c(1,3))
+# Store the deviance residuals
+res = resid(glm_model,type="deviance")
+
+# QQ-plot and Histogram
+qqPlot(res, ylab="Deviance residuals")
+hist(res)
+AIC(glm_model)
+```
+
+**Response to Question 6**: 
+
+
+
+**The End.**

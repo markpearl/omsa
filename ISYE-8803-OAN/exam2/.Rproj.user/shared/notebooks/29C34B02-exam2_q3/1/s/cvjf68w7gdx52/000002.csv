@@ -1,0 +1,6 @@
+"0","D <- rgb_2gray(readImage('image.jpg'))*255"
+"0","plot(imageShow(D))"
+"2","no non-missing arguments to min; returning Inf"
+"2","no non-missing arguments to max; returning -Inf"
+"2","no non-missing arguments to min; returning Inf"
+"2","no non-missing arguments to max; returning -Inf"

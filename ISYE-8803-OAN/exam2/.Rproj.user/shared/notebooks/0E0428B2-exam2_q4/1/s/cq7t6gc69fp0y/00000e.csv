@@ -1,0 +1,2 @@
+"0","par(mfrow=c(1,3))"
+"0","imagesc(Z_random, main =""Z_random"")"

@@ -1,0 +1,48 @@
+---
+title: "hw3-5.1"
+author: "Mark Pearl"
+date: "29/01/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(outliers)
+```
+
+```{r uscrime_data with sample}
+uscrime_data <- read.table('C:/Users/mjpearl/Desktop/omsa/ISYE-6501-OAN/hw3/data/uscrime.txt',header = TRUE, stringsAsFactors = FALSE)
+head(uscrime_data)
+```
+
+## Plots Section
+The following plots will conduct exploratory analysis on the data to get a sense of the data's distribution and to see if we can spot any outliers with a visual representation.
+
+```{r boxplot}
+boxplot(x= uscrime_data$Crime)
+```
+
+From the boxplot we can see that there are a few observations above the whisker which indicates values past Q3 are outliers (2 observations closest to a Crime value of 2000). There does not seem to be any observations in the lower quartiles that indicate any outliers. 
+
+```{r uscrime_data histogram}
+hist(uscrime_data$Crime)
+```
+
+The result of histogram indicates a skewed distribution for the right tail. For a grubbs test to be effective it is implied that the data follows a normal distribution. However our data does follow a normal distribution towards the middle portion of the graph, so it could mean that we have outlying data. We will continue with conducting the grubbs test for further investigation.
+
+## Grub Test Section
+To ensure we test observations represented by the minimum and maximum values on the graph, we will use the "opposite" parameter of the grubbs test function.
+
+```{r grubtest1}
+grubbs.test(x=uscrime_data$Crime, type = 10, opposite = F)
+```
+
+```{r grubtest2}
+grubbs.test(x=uscrime_data$Crime, type = 10, opposite = T)
+```
+
+The first output indicates that the highest or maximum observation closest to 2000 on the graph can be deemed an outlier due to the significantly low p-value of 0.07. This holds true to what was also determined in the boxplot output. 
+
+The second output indicates that the lowest value of the crime feature is with a high certainty not an outlier as we retrieved a p-value of 1.

@@ -1,0 +1,23 @@
+"0","#Read in and cleanse the data"
+"0","income_democracy <- read_csv('./data/income_democracy.csv')"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m-------------------------------------------------------------------------------------------------------[39m
+cols(
+  country = [31mcol_character()[39m,
+  year = [32mcol_double()[39m,
+  dem_ind = [32mcol_double()[39m,
+  log_gdppc = [32mcol_double()[39m,
+  log_pop = [32mcol_double()[39m,
+  age_1 = [32mcol_double()[39m,
+  age_2 = [32mcol_double()[39m,
+  age_3 = [32mcol_double()[39m,
+  age_4 = [32mcol_double()[39m,
+  age_5 = [32mcol_double()[39m,
+  educ = [32mcol_double()[39m,
+  age_median = [32mcol_double()[39m,
+  code = [32mcol_double()[39m
+)
+
+"
+"0","income_cleansed = subset(income_democracy,select = -c(country,year,code))"
+"0","income_cleansed = income_cleansed %>% drop_na()"

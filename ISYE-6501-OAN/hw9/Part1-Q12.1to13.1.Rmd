@@ -1,0 +1,49 @@
+---
+title: "hw9"
+author: "Mark Pearl"
+date: "3/12/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library('FrF2')
+```
+
+## R Markdown
+
+# Question 12.1
+Describe a situation or problem from your job, everyday life, current events, etc., for which a design of experiments approach would be appropriate.
+
+If I were to trace this back to sports. A good example of an experiment would be when a company is testing the effectiveness of a new hockey stick when producing a shot. Factors such as player weight, age, strength, technique, etc. We would be able to control these factors to determine their overall effectiveness of the stick. 
+
+# Question 12.2
+To determine the value of 10 different yes/no features to the market value of a house (large yard, solar
+roof, etc.), a real estate agent plans to survey 50 potential buyers, showing a fictitious house with
+different combinations of features. To reduce the survey size, the agent wants to show just 16 fictitious
+houses. Use R’s FrF2 function (in the FrF2 package) to find a fractional factorial design for this
+experiment: what set of features should each of the 16 fictitious houses have? Note: the output of
+FrF2 is “1” (include) or “-1” (don’t include) for each feature.
+
+```{r house}
+library('FrF2')
+FrF2(nruns = 16, nfactors = 10)
+```
+
+From the results we can see that the first combination we should only keep the following features: {A, B, D, E, H}. This same logic can be used to determine which factors to keep from rows (i.e. houses) 2-16. Since we have 10 features and 2 possible expected values, then we can have 1024 permutations or combinations of 16 factor sets.
+
+# Question 13.1
+For each of the following distributions, give an example of data that you would expect to follow this distribution (besides the examples already discussed in class).
+
+
+Answer
+i) Bionmial: An example of data that follows the Binomial distribution is a survey of responses to a yes-no question where the probably of responses is known or can be estimated. An example could be a team winning or losing a game.
+
+ii) Geometric: Number of times I take a shot with my hockey stick before my stick breaks. 
+
+iii) Poisson: This distribution is excellent at modeling event occurances over an interval of time. Number of parking tickets issued in the City of Ottawa in the morning between 7 to 9 AM. 
+
+iv) Exponential: This distribution can model the lengths of inter-arrival times between events modeled by the Poisson distribution. An example of this could be the time between parking tickets issued. 
+
+v) Weibull: This distribution is used to model factors where the probability changes over time. An example of this would be the odds of winning a 50 to 50 ticket at a hockey game as the time get closer to the annoucement of the winner. 

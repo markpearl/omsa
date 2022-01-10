@@ -1,0 +1,8 @@
+"0","# Option 2: FPCA"
+"0","library(fda)"
+"0","splinebasis = create.bspline.basis(c(0,1),10)"
+"0",""
+"0","smooth = smooth.basis(x,t(rbind(ecg_train,ecg_test)),splinebasis)"
+"2","Error in h(simpleError(msg, call)) : 
+  error in evaluating the argument 'x' in selecting a method for function 't': object 'ecg_train' not found
+"

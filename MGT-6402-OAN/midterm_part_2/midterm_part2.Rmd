@@ -1,0 +1,99 @@
+---
+title: "mgt-6403-midterm-part2"
+author: "Mark Pearl"
+date: "3/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library(ISLR)
+college <- ISLR::College
+summary(college)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r college, echo=FALSE}
+model1 <- lm(Personal ~ Room.Board, data=college)
+modelloglin <- lm(log(Personal) ~ Room.Board, data=college)
+model1inlog <- lm(Personal ~ log(Room.Board), data=college)
+model1loglog <- lm(log(Personal) ~ log(Room.Board), data=college)
+
+summary(model1)
+summary(modelloglin)
+summary(model1inlog)
+summary(model1loglog)
+```
+
+
+```{r binary, echo=FALSE}
+binary_csv <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/midterm_part_2/binary.csv',header = TRUE, fileEncoding="UTF-8-BOM")
+names(binary_csv)
+```
+
+```{r binary, echo=FALSE}
+logit <- glm(admit ~ gre + gpa, data = binary_csv, family = "binomial")
+summary(logit)
+```
+
+```{r roc, echo=FALSE}
+library("ROCR")
+library("ggExtra")
+pred <- prediction(logit$fitted.values,binary_csv$admit)
+
+perf <- performance(pred, "tpr","fpr")
+plot(perf,colorize=T)
+
+auc.perf <- performance(pred, measure="auc")
+auc.perf@y.values
+```
+
+```{r berkshire, echo=FALSE}
+library(PerformanceAnalytics)
+berkshire_csv <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/midterm_part_2/Berkshire.csv',header = TRUE)
+#table.Stats(berkshire_csv$BrkRet)
+Return.cumulative(berkshire_csv$BrkRet,geometric = FALSE)
+#Return.cumulative(berkshire_csv$MKT,geometric = TRUE)
+SharpeRatio(berkshire_xts[,1],berkshire_xts[,2])
+#SharpeRatio(berkshire_market_xts[,1],berkshire_market_xts[,2])
+```
+
+```{r lmmodel, echo=FALSE}
+library(xts)
+berkshire_csv$date <- as.Date(berkshire_csv$Date, format = "%m/%d/%Y")
+berkshire_xts <- xts(berkshire_csv[,c("BrkRet","RF")], order.by = berkshire_csv$date)
+berkshire_market_xts <- xts(berkshire_csv[,c("MKT","RF")], order.by = berkshire_csv$date)
+```
+
+```{r lmmodel, echo=FALSE}
+output <- berkshire_csv[,c("BrkRet","RF")]
+```
+
+
+```{r factor, echo=FALSE}
+factor_csv <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/midterm_part_2/Factor_HiTec.csv',header = TRUE, fileEncoding="UTF-8-BOM")
+factor_lm <- lm(HiTec ~  RF + Mkt_rf + SMB+ HML + Mom + BAB + QMJ, data=factor_csv)
+summary(factor_lm)
+library(stargazer)
+#stargazer(factor_lm,align=TRUE,type = 'html',out='factormodel.html')
+```
+
+```{r factor, echo=FALSE}
+ups_csv <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/midterm_part_2/UPS_KO.csv',header = TRUE, fileEncoding="UTF-8-BOM")
+ups_lm <- lm(UPS ~ Mkt_RF + SMB + HML,data=ups_csv)
+summary(ups_lm)
+ups_lm <- lm(KO ~ Mkt_RF + SMB + HML,data=ups_csv)
+summary(ups_lm)
+```

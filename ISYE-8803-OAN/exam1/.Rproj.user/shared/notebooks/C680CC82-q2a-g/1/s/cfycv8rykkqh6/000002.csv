@@ -1,0 +1,6 @@
+"0","#layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))"
+"0","#@U=225"
+"0","#noisy_matrix <- as.cimg(matrix(rnorm(n=dim(horse_grayscale_rescaled)[1]*dim(horse_grayscale_rescaled)[2],mean=0,sd=10),ncol=dim(horse_grayscale_rescaled)[2]))"
+"0","noisy_matrix <- imnoise(dim(horse_grayscale_rescaled)[1],dim(horse_grayscale_rescaled)[2],mean=0,sd=100)"
+"0","noisy_image =horse_grayscale_rescaled+noisy_matrix"
+"0","plot(noisy_image)"

@@ -1,0 +1,73 @@
+---
+title: "exam2"
+author: "Mark Pearl"
+date: "7/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(R.matlab) 
+library(OpenImageR)
+library(pracma)
+library(Rmpfr)
+```
+
+```{r original image}
+D <- rgb_2gray(readImage('image.jpg'))*255
+plot(imageShow(D))
+```
+
+```{r robust pca, include=TRUE}
+lambda <- 1e-2
+m <- dim(D)[1]
+n <- dim(D)[2]
+tol <- 1e-7
+maxIter <- 1000
+# Initialize A,E,Y,u
+Y <- D
+norm_two <- norm(Y,"F")
+norm_inf <- Norm(as.vector(Y), Inf) / lambda
+Y <- Y / norm_inf
+A_hat <- matrix(0,m, n)
+E_hat <- matrix(0,m, n)
+mu <- 1.25/norm_two 
+mu_bar <- mu * 1e7 
+rho <- 1.5         # this one can be tuned
+d_norm <- norm(D, "F")
+iter <- 0 
+total_svd <- 0
+converged <- FALSE 
+stopCriterion <- 1
+
+while(!converged){
+  iter <- iter + 1
+  iter
+  temp_T <- D - A_hat + (1/mu)*Y
+  E_hat <- pmax(temp_T - lambda/mu, 0)
+  E_hat <- E_hat+pmin(temp_T + lambda/mu, 0)
+  decomp <- svd(D - E_hat + (1/mu)*Y)
+  U <- decomp$u
+  S <- decomp$d
+  V <- decomp$v
+  S_t <- S- 1/mu
+  S_t[S_t<0] <- 0
+  A_hat <- U %*% diag(S_t) %*% t(V)
+  total_svd <- total_svd+1
+  Z <- D - A_hat - E_hat
+  Y <- Y + mu*Z
+  mu <- min(mu*rho, mu_bar)
+  # stop Criterion
+  stopCriterion <- norm(Z, "F") / d_norm
+  if (stopCriterion < tol){
+    converged <- TRUE
+  }
+}
+```
+
+```{r show images, include=TRUE}
+plot(imageShow(A_hat))
+```
+
+```{r show images}
+plot(imageShow(E_hat))
+```

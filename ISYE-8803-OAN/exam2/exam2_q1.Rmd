@@ -1,0 +1,135 @@
+---
+title: "exam2"
+author: "Mark Pearl"
+date: "7/28/2021"
+output: html_document
+---
+
+```{r import libraries}
+library(glmnet)
+library(tidyverse)
+library(ggplot2)
+library(caret)
+library(glmnet)
+library(tidyr)
+library(dplyr)
+library(ggrepel)
+```
+
+```{r read data and split into train/test}
+beans <- read_csv('./Question1.csv')
+
+#Split data into test and train
+train <- beans[0:2800,]
+test <- beans[2801:3871,]
+
+#Modify class variable to map back to a factor
+train <-
+  train %>% mutate(ClassFactor = case_when(
+        Class == 1 ~ "Barbunya",
+        Class == 2 ~ "Bombay",
+        TRUE ~ "Seker"))
+
+train$Class <- as.factor(train$Class)
+
+test <-
+  test %>% mutate(ClassFactor = case_when(
+        Class == 1 ~ "Barbunya",
+        Class == 2 ~ "Bombay",
+        TRUE ~ "Seker"))
+
+test_x <- test[,0:16]
+y_actual <- test[,17]
+```
+
+```{r part 1 muliti-nomial logistic regression}
+#Use glmnet function and plot the results
+fit <- glmnet(x = as.matrix(train[,0:16]),y = train$Class, family = "multinomial",alpha=0,lambda=0)
+options(scipen=999)
+fit$beta
+```
+
+```{r part 1 muliti-nomial logistic regression}
+create_ggplot <- function(beta_index, lambda_var) {
+  betas = matrix(mod$glmnet.fit$beta)[beta_index,][[1]]
+  lambdas = mod$lambda
+  names(lambdas) = betas@Dimnames[[2]]
+  as.data.frame(as.matrix(betas)) %>% 
+  tibble::rownames_to_column("variable") %>% 
+  pivot_longer(-variable) %>% 
+  mutate(lambda=lambdas[name]) %>% 
+  ggplot(aes(x=lambda,y=value,col=variable)) + 
+  geom_line() + 
+  geom_vline(xintercept = lambda_var,color='red')+
+  geom_label_repel(data=~subset(.x,lambda==min(lambda)),
+  aes(label=variable),nudge_x=-0.5) +
+  scale_x_log10()
+}
+```
+
+
+```{r part 1 muliti-nomial logistic regression get prediction / confusion matrix result}
+cnf <- confusion.glmnet(fit, newx=as.matrix(test_x), newy = y_actual[[1]])
+cnf
+```
+
+
+```{r part 2 ridge muliti-nomial logistic regression}
+#Create cv.fit object for ridge regression
+#p=9
+mod <- cv.glmnet(x = as.matrix(train[,0:16]),y = train$Class, family = "multinomial",alpha = 0, nfolds=20, grouped = FALSE,type.measure = 'class')
+lambda_ridge = mod$lambda.min
+ridge_final = glmnet(as.matrix(train[,0:16]), y = train$Class, family = "multinomial",alpha = 0,lambda=lambda_ridge)
+ridge_final$beta
+```
+```{r get output ridge}
+create_ggplot(1, lambda_ridge)
+create_ggplot(2, lambda_ridge)
+create_ggplot(3, lambda_ridge)
+```
+
+
+```{r part 1 muliti-nomial logistic regression get prediction / confusion matrix result}
+cnf_ridge <- confusion.glmnet(ridge_final, newx=as.matrix(test_x), newy = y_actual[[1]])
+cnf_ridge
+```
+
+```{r part 3 lasso muliti-nomial logistic regression}
+#Create cv.fit object for ridge regression
+#p=9
+mod <- cv.glmnet(x = as.matrix(train[,0:16]),y = train$Class, family = "multinomial",alpha = 1, nfolds=20)
+lambda_lasso = mod$lambda.min
+lasso_final = glmnet(as.matrix(train[,0:16]), y = train$Class, family = "multinomial",alpha = 1,lambda=lambda_lasso)
+lasso_final$beta
+```
+
+```{r get output lasso}
+create_ggplot(1, lambda_lasso)
+create_ggplot(2, lambda_lasso)
+create_ggplot(3, lambda_lasso)
+```
+
+```{r part 1 muliti-nomial logistic regression get prediction / confusion matrix result}
+cnf_lasso <- confusion.glmnet(lasso_final, newx=as.matrix(test_x), newy = y_actual[[1]])
+cnf_lasso
+```
+```{r adaptive lasso}
+gamma = 0.5
+b.ridge = do.call(cbind, coef(ridge_final))
+w1 <- 1 / abs(as.matrix(b.ridge)[-1,])^gamma
+mod <- cv.glmnet(x = as.matrix(train[,0:16]),y = train$Class,nfold = 20,family = "multinomial",alpha = 1,penalty.factor = rowNorms(w1))
+lambda_alasso = mod$lambda.min
+alasso_final = glmnet(as.matrix(train[,0:16]), y = train$Class, family = "multinomial",alpha = 1,lambda=lambda_alasso)
+alasso_final$beta
+```
+
+```{r get output lasso}
+create_ggplot(1, lambda_alasso)
+create_ggplot(2, lambda_alasso)
+create_ggplot(3, lambda_alasso)
+```
+
+```{r part 1 muliti-nomial logistic regression get prediction / confusion matrix result}
+cnf_alasso <- confusion.glmnet(alasso_final, newx=as.matrix(test_x), newy = y_actual[[1]])
+cnf_alasso
+```

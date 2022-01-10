@@ -1,0 +1,6 @@
+"0","#Drop columns that end with _no, since yes_ factor already contains inherit grouping for the binary variable"
+"0","library(dplyr)"
+"0","students_dummies_final  <- select(students_dummies_final, -contains(""Medu""))"
+"2","Error in UseMethod(""select"") : 
+  no applicable method for 'select' applied to an object of class ""data.frame""
+"

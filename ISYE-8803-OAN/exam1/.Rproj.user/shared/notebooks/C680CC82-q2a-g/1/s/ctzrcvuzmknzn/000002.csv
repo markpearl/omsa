@@ -1,0 +1,4 @@
+"0","horse_grayscale_rescaled <- horse_grayscale*255"
+"0","layout(matrix(c(1,1,2,2), ncol = 1, byrow = TRUE))"
+"0","linear = (256-1)-horse_grayscale"
+"0","plot(linear,main = 'Linear / Negative Transformation on Horse Grayscale')"

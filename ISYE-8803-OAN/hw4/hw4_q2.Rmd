@@ -1,0 +1,147 @@
+---
+title: "hw2"
+author: "Mark Pearl"
+date: "7/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidyr)
+library(glmnet)
+```
+
+```{r q2 data files and cleansing}
+#Read in and cleanse the data
+income_democracy <- read_csv('./data/income_democracy.csv')
+income_cleansed = subset(income_democracy,select = -c(country,year,code))
+income_cleansed = income_cleansed %>% drop_na()
+```
+```{r q2 create train / test datasets}
+## 80% of the sample size
+smp_size <- floor(0.8 * nrow(income_cleansed))
+train_ind <- sample(seq_len(nrow(income_cleansed)), size = smp_size)
+
+train <- income_cleansed[train_ind, ]
+test <- income_cleansed[-train_ind, ]
+
+y_train <- train[c("dem_ind")]
+X_train <- subset(train,select = -c(dem_ind))
+
+y_test <- test[c("dem_ind")]
+X_test <- subset(test,select = -c(dem_ind))
+
+p=9
+```
+
+## Your job is to predict democracy index by real GDP per capita and other demographic features.  Inorder to predict the democracy index we are going to use the following models:
+1.  Ridge Regression (10 points)
+2.  Lasso Regression (10 points)
+3.  Adaptive Lasso Regression (10 points)
+4.  Elastic Net Regression (10 points)
+```{r q2 ridge regression}
+# Ridge
+ridge = cv.glmnet(as.matrix(X_train), as.matrix(y_train), family = "gaussian", alpha = 0, intercept = FALSE, nfolds=20)
+lambda_ridge = ridge$lambda.min
+lambda_ridge
+coef.ridge = matrix(coef(ridge, s = lambda_ridge))[2:(p+1)]
+ridge = glmnet(as.matrix(X_train), as.matrix(y_train), family = "gaussian", alpha = 0, intercept = FALSE, nfolds=20)
+plot(ridge, xvar = "lambda", label = TRUE)
+abline(v = lambda_ridge)
+```
+
+```{r q2 ridge regression}
+# Ridge
+y_ridge = predict(ridge, as.matrix(X_train), s = lambda_ridge)
+mse_ridge = sum((y_test-y_ridge)^2)/nrow(X_test)
+mse_ridge
+```
+
+
+
+```{r q2 lasso regression plot}
+# Lasso
+lasso = cv.glmnet(as.matrix(X_train), as.matrix(y_train), family = "gaussian", alpha = 1, intercept = FALSE, nfolds=20)
+lambda_lasso = lasso$lambda.min
+lambda_lasso
+coef.lasso = matrix(coef(lasso, s = lambda_lasso))[2:(p+1)]
+lasso = glmnet(as.matrix(X_train), as.matrix(y_train), family = "gaussian", alpha = 1, intercept = FALSE, nfolds=20)
+plot(lasso, xvar = "lambda", label = TRUE)
+abline(v = log(lambda_lasso))
+```
+
+
+```{r q2 lasso regression}
+# Ridge
+y_lasso = predict(lasso, as.matrix(X_train), s = lambda_lasso)
+mse_lasso = sum((y_test-y_lasso)^2)/nrow(X_test)
+mse_lasso
+```
+
+```{r q2 adaptive lasso regression}
+gamma = 2
+b.ols = solve(t(as.matrix(X_train))%*%as.matrix(X_train))%*%t(as.matrix(X_train))%*%as.matrix(y_train)
+ridge = cv.glmnet(as.matrix(X_train), as.matrix(y_train), family = "gaussian", alpha = 0, intercept = FALSE, nfolds=20)
+l.ridge = ridge$lambda.min
+b.ridge = matrix(coef(ridge, s = l.ridge))[2:(p+1)]
+w1 = 1/abs(b.ols)^gamma
+w2 = 1/abs(b.ridge)^gamma
+alasso1 = cv.glmnet(as.matrix(X_train), as.matrix(y_train), family = "gaussian", alpha = 1, intercept = FALSE, penalty.factor = w1, nfolds=20)
+alasso2 = cv.glmnet(as.matrix(X_train), as.matrix(y_train), family = "gaussian", alpha = 1, intercept = FALSE, penalty.factor = w2, nfolds=20)
+lambda1 = alasso1$lambda.min
+lambda2 = alasso2$lambda.min
+coef.alasso1 = matrix(coef(alasso1, s = lambda1))[2:(p+1)]
+coef.alasso2 = matrix(coef(alasso2, s = lambda2))[2:(p+1)]
+alasso1 = glmnet(as.matrix(X_train), as.matrix(y_train), family = "gaussian", alpha = 1, intercept = FALSE, penalty.factor = w1, nfolds=20)
+alasso2 = glmnet(as.matrix(X_train), as.matrix(y_train), family = "gaussian", alpha = 1, intercept = FALSE, penalty.factor = w2, nfolds=20)
+plot(alasso1, xvar = "lambda", label = TRUE)
+abline(v=log(lambda1))
+```
+
+```{r q2 adaptive lasso regression}
+plot(alasso2, xvar = "lambda", label = TRUE)
+abline(v=lambda2)
+```
+
+```{r q2 adaptive lasso regression}
+y_alasso1 = predict(alasso1, as.matrix(X_train), s = lambda1)
+mse_alasso1 = sum((y_test-y_alasso1)^2)/nrow(X_test)
+y_alasso2 = predict(alasso2, as.matrix(X_train), s = lambda2)
+mse_alasso2 = sum((y_test-y_alasso2)^2)/nrow(X_test)
+mse_alasso1
+mse_alasso2
+```
+
+```{r q2 elastic regression}
+# Elastic
+alpha_seq = seq(0.1,0.99,0.01)
+lambda_min_list <- rep(0,length(alpha_seq))
+for (i in c(1:length(alpha_seq))) {
+  elastic = cv.glmnet(as.matrix(X_train), as.matrix(y_train),alpha=alpha_seq[i], family = "gaussian", intercept = FALSE, nfolds=20)
+  lambda_elastic = elastic$lambda.min
+  lambda_min_list[i]=lambda_elastic
+}
+```
+
+```{r q2 elastic regression}
+
+plot(c(1:length(alpha_seq)),lambda_min_list,type = "l",ylab = 'Lambda Values',xlab='X sequence (1 to 90)',main = 'Lambda Plots for Elastic Net')
+lambda_elastic = lambda_min_list[which.min(lambda_min_list)]
+points(which.min(lambda_min_list),lambda_elastic,col = "red", lwd=5)
+text(lambda_elastic~which.min(lambda_min_list), labels=sprintf("%s Optimal Lambda for Alpha of: %s",round(lambda_elastic,5),alpha_seq[which.min(lambda_min_list)]),cex=0.9, font=2,pos=2)
+```
+
+
+```{r q2 elastic regression}
+elastic = glmnet(as.matrix(X_train), as.matrix(y_train),alpha=lambda_elastic, family = "gaussian", intercept = FALSE, nfolds=20)
+y_elastic = predict(elastic, as.matrix(X_train), s = lambda_elastic)
+coef.elastic = matrix(coef(elastic, s = lambda_elastic))[2:(p+1)]
+plot(elastic, xvar = "lambda", label = TRUE)
+abline(v = lambda_elastic)
+```
+
+```{r q2 elastic regression}
+mse_elastic = sum((y_test-y_elastic)^2)/nrow(X_test)
+mse_elastic
+```

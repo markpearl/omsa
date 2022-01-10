@@ -1,0 +1,272 @@
+---
+title: "hw3-p2"
+author: "Mark Pearl"
+date: "4/15/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Graded Homework #3: Part 2
+
+Homework 3 - Part 2 is from Week 11 and 12 and weighs 4% of your grade. It will require you to submit one file (HTML or PDF) which will be peer corrected by three of your peers. The TAs will also go through your submission and eventually assign the final marks.
+
+Submit ONE HTML or PDF file with your code and answers to these 8 questions neatly labeled, clear and concise. Use RMarkdown to knit the file. You may work on the homework for as long as you like within the given window. As long as you do not click submit, you can enter and exit the assignment as many times as necessary during the time period that it is available. Again, please note, you should only click "submit" when you are completely finished with the assignment and ready to submit it for grading.
+
+Also, please remember that you are to complete this assignment on your own. Any help given or received constitutes cheating. If you have any general questions about the assignment, please post it to the Piazza board. If your question involves specific references to the answer to a question or questions, please be sure to mark your post as private.
+
+Instructions for Q.1 to 4
+
+Please use the Facebook Ad dataset KAG.csv (Links to an external site.) for the next set of questions. We advise solving these questions using R (preferably using dplyr library wherever applicable) after reviewing the code provided for Week 11 and other resources provided for learning dplyr in R Learning Guide.
+
+```{r advertising}
+kag_csv <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/assignment_3/KAG.csv')
+head(kag_csv)
+```
+
+## Including Plots
+
+Q.1 Which ad (provide ad_id as the answer) among the ads that have the least CPC led to the most impressions?
+
+In this case I will determine the max impressions based on the CPC = 0. 
+
+```{r q1, Echo=T}
+library(dplyr)
+max(kag_csv[kag_csv$CPC==0,]$Impressions)
+```
+```{r ad_id least CPC 2, Echo=T}
+kag_csv$ad_id[kag_csv$Impressions==24362]
+```
+Therefore the ad_id is 1121094.
+
+Q.2 What campaign (provide campaign_id as the answer) had spent least efficiently on brand awareness on an average(i.e. most Cost per mille or CPM: use total cost for the campaign / total impressions in thousands)?
+
+```{r q2, Echo=T}
+df_campaign <- aggregate(.~campaign_id, kag_csv, sum)
+df_campaign$output <- df_campaign$Spent/df_campaign$Impressions
+df_campaign %>%
+  select(campaign_id, output)
+```
+As you can see, campaign 936 had the least efficient spending.
+
+Q.3 Assume each conversion (‘Total_Conversion’) is worth $5, each approved conversion (‘Approved_Conversion’) is worth $50. ROAS (return on advertising spent) is revenue as a percentage of the advertising spent . Calculate ROAS and round it to two decimals.
+
+Make a boxplot of the ROAS grouped by gender for interest = 15, 21, 101 (or interest_id = 15, 21, 101) in one graph. Also try to use the function ‘+ scale_y_log10()’ in ggplot to make the visualization look better (to do so, you just need to add ‘+ scale_y_log10()’ after your ggplot function). The x-axis label should be ‘Interest ID’ while the y-axis label should be ROAS.  [8 points]
+
+```{r q3, Echo=T}
+library(ggplot2)
+calculate_ROAS <- function(total_conversion, approved_conversion, spent) {
+    round(100 * (total_conversion * 5 + approved_conversion * 50) / spent, 2)
+}
+
+kag_csv %>%
+    select(interest, Total_Conversion, Approved_Conversion, Spent, gender) %>% 
+    filter(interest %in% c(15,21,101)) %>% 
+    mutate(Gender = factor(gender)) %>% 
+    mutate(ROAS = calculate_ROAS(Total_Conversion, Approved_Conversion, Spent)) %>%
+    filter(is.finite(ROAS)) %>% 
+    ggplot(aes(x = ordered(interest), y = ROAS, color = Gender)) +
+    geom_boxplot() +
+    scale_y_log10() +
+    xlab("Interest ID") +
+    ylab("ROAS %") +
+    ggtitle("ROAS % Grouped By Interest, Gender")
+
+
+```
+
+Q.4 Summarize the median and mean of ROAS by genders when campaign_id == 1178.
+
+```{r q4, Echo=T}
+kag_csv %>%
+    select(interest, Total_Conversion, Approved_Conversion, Spent, gender, campaign_id) %>% 
+    filter(campaign_id == 1178) %>% 
+    mutate(Gender = factor(gender)) %>% 
+    mutate(ROAS = calculate_ROAS(Total_Conversion, Approved_Conversion, Spent)) %>%
+    filter(is.finite(ROAS)) %>%
+    group_by(interest,gender) %>%
+    summarise(Mean=mean(ROAS),Median=median(ROAS))
+```
+
+```{r q5, Echo=T}
+
+adv_csv <- read.csv('C:/Users/mjpearl/Desktop/omsa/MGT-6402-OAN/assignment_3/advertising1.csv')
+head(adv_csv)
+```
+Q.5
+
+a) We aim to explore the dataset so that we can better choose a model to implement. Plot histograms for at least 2 of the continuous variables in the dataset. Note it is acceptable to plot more than 2. [1 point]
+
+```{r q5a, Echo=T}
+adv_csv$Clicked.on.Ad <- as.factor(adv_csv$Clicked.on.Ad)
+hist(adv_csv$Area.Income)
+```
+```{r q5a chart 2, Echo=T}
+hist(adv_csv$Daily.Internet.Usage)
+```
+
+b) Again on the track of exploring the dataset, plot at least 2 bar charts reflecting the counts of different values for different variables. Note it is acceptable to plot more than 2. [1 point]
+
+```{r q5b, Echo=T}
+barplot(table(adv_csv$Age), main="Age Value Count",
+   xlab="Age")
+```
+```{r q5c, Echo=T}
+barplot(table(adv_csv$Country), main="Country Value Count",
+   xlab="Country")
+```
+c) Plot boxplots for Age, Area.Income, Daily.Internet.Usage and Daily.Time.Spent.on.Site separated by the variable Clicked.on.Ad. To clarify, we want to create 4 plots, each of which has 2 boxplots: 1 for people who clicked on the ad, one for those who didn’t. [2 points]
+
+```{r q5c 1, Echo=T}
+adv_csv %>%
+    select(Age, Area.Income, Daily.Internet.Usage, Daily.Time.Spent.on.Site, Clicked.on.Ad) %>%
+    ggplot(aes(x = ordered(Clicked.on.Ad), y = Age, color = Clicked.on.Ad)) +
+    geom_boxplot() +
+    xlab("Clicked On Ad") +
+    ylab("Age") +
+    ggtitle("Age Grouped by Click On Ad")
+```
+```{r q5c 2, Echo=T}
+adv_csv %>%
+    select(Age, Area.Income, Daily.Internet.Usage, Daily.Time.Spent.on.Site, Clicked.on.Ad) %>%
+    ggplot(aes(x = ordered(Clicked.on.Ad), y = Area.Income, color = Clicked.on.Ad)) +
+    geom_boxplot() +
+    xlab("Clicked On Ad") +
+    ylab("Income") +
+    ggtitle("Income Grouped by Click On Ad")
+```
+
+```{r q5c 3, Echo=T}
+adv_csv %>%
+    select(Age, Area.Income, Daily.Internet.Usage, Daily.Time.Spent.on.Site, Clicked.on.Ad) %>%
+    ggplot(aes(x = ordered(Clicked.on.Ad), y = Daily.Time.Spent.on.Site, color = Clicked.on.Ad)) +
+    geom_boxplot() +
+    xlab("Clicked On Ad") +
+    ylab("Daily.Time.Spent.on.Site") +
+    ggtitle("Daily Time Spent on Site Grouped by Click On Ad")
+```
+```{r q5c 4, Echo=T}
+adv_csv %>%
+    select(Age, Area.Income, Daily.Internet.Usage, Daily.Time.Spent.on.Site, Clicked.on.Ad) %>%
+    ggplot(aes(x = ordered(Clicked.on.Ad), y = Daily.Internet.Usage, color = Clicked.on.Ad)) +
+    geom_boxplot() +
+    xlab("Clicked On Ad") +
+    ylab("Daily.Internet.Usage") +
+    ggtitle("Daily Internet Usage Grouped by Click On Ad")
+```
+d) Based on our preliminary boxplots, would you expect an older person to be more likely to click on the ad than someone younger? [2 points]
+
+Yes based on the results you can see that with increasing Age, people click more on the advertisement compared to the younger generation.
+
+Q.6
+
+Part (a) [3 points]
+
+1. Make a scatter plot for Area.Income against Age. Separate the datapoints by different shapes based on if the datapoint has clicked on the ad or not.
+
+```{r q6_a, echo = F, warning = F}
+library(ggplot2)
+
+#Going to take a sample of 300 rows of the dataset to make the chart more readable
+ggplot(adv_csv, aes(x=Age, y=Area.Income, shape=Clicked.on.Ad,color=Clicked.on.Ad)) + 
+    geom_point(size=3)
+```
+
+2. Based on this plot, would you expect a 31-year-old person with an Area income of $62,000 to click on the ad or not?
+
+You can see based on the plot you can see that it's highly likely the person matching these conditions did not click on the Ad.
+
+Part (b) [3 points]
+
+1. Similar to part a), create a scatter plot for Daily.Time.Spent.on.Site against Age. Separate the datapoints by different shapes based on if the datapoint has clicked on the ad or not.
+
+```{r q6_b, echo = F}
+library(ggplot2)
+
+#Going to take a sample of 300 rows of the dataset to make the chart more readable
+ggplot(adv_csv, aes(x=Age, y=Daily.Time.Spent.on.Site, shape=Clicked.on.Ad, color=Clicked.on.Ad)) + 
+    geom_point(size=3)
+```
+
+2. Based on this plot, would you expect a 50-year-old person who spends 60 minutes daily on the site to click on the ad or not?
+
+Yes you could still likely say that they would click on the ad. However, this seems to be very close to the cut-off point where most observations start to become 0 or no for Clicked on Ad.
+
+Q.7
+
+Part (a) [2 points]
+
+1. Now that we have done some exploratory data analysis to get a better understanding of our raw data, we can begin to move towards designing a model to predict advert clicks.
+
+2. Generate a correlation funnel (using the correlation funnel package) to see which of the variable in the dataset have the most correlation with having clicked the advert.
+
+```{r q7a, Echo=T}
+library(correlationfunnel)
+library(dplyr)
+
+adv_csv_binarized_tbl <- adv_csv %>%
+  mutate(Age= as.numeric(Age),
+         Male = factor(Male)) %>% 
+  binarize(n_bins=5, thresh_infreq = 0.01, name_infreq = "OTHER", one_hot = TRUE)
+
+adv_csv_corr_tbl <- adv_csv_binarized_tbl %>%
+  correlate(Clicked.on.Ad__1)
+
+adv_csv_corr_tbl %>%
+  arrange(desc(correlation)) %>%
+  plot_correlation_funnel()
+```
+From the correlation plot, we can see that the first 4 varaibles containing the highest correlation to Click.on.Ad is 
+
+```{r q7b, Echo=T}
+#Let's retrieve the 4 highest correlated variables to use for the logistic regression
+adv_csv_corr_tbl
+```
+NOTE: Here we are creating the correlation funnel in regards to HAVING clicked the advert, rather than not. This will lead to a minor distinction in your code between the 2 cases. However, it will not affect your results and subsequent variable selection.
+Part (b) [2 points]
+
+1. Based on the generated correlation funnel, choose the 4 most covarying variables (with having clicked the advert) and run a logistic regression model for Clicked.on.Ad using these 4 variables.
+
+```{r q7b 1, Echo=T}
+#Let's retrieve the 4 highest correlated variables to use for the logistic regression
+
+logit <- glm(Clicked.on.Ad ~ `Daily.Time.Spent.on.Site` + `Daily.Internet.Usage` + `Area.Income` + `Age`, data=adv_csv,
+             family = "binomial")
+```
+
+2. Output the summary of this model.
+
+```{r q7b 2, Echo=T}
+summary(logit)
+```
+
+Q.8 [4 points]
+
+Now that we have created our logistic regression model using variables of significance, we must test the model.
+When testing such models, it is always recommended to split the data into a training (from which we build the model) and test (on which we test the model) set. This is done to avoid bias, as testing the model on the data from which it is originally built from is unrepresentative of how the model will perform on new data.
+That said, for the case of simplicity, test the model on the full original dataset.
+Use type ="response" to ensure we get the predicted probabilities of clicking the advert
+Append the predicted probabilities to a new column in the original dataset or simply to a new data frame. The choice is up to you, but ensure you know how to reference this column of probabilities.
+Using a threshold of 80% (0.8), create a new column in the original dataset that represents if the model predicts a click or not for that person. Note this means probabilities above 80% should be treated as a click prediction.
+Now using the caret package, create a confusion matrix for the model predictions and actual clicks. Note you do not need to graph or plot this confusion matrix.
+How many false-negative occurrences do you observe? Recall false negative means the instances where the model predicts the case to be false when in reality it is true. For this example, this refers to cases where the ad is clicked but the model predicts that it isn’t
+
+```{r q8 logit output, Echo=T}
+library(ROCR)
+
+predictLogit <- predict(logit, type='response')
+adv_csv$output <- predictLogit
+
+head(adv_csv)
+```
+We can see the results from the output of the original dataset that the prediction colum "output" has been added as a column. 
+
+```{r q8 confusion matrix, Echo=T}
+table(adv_csv$Clicked.on.Ad,adv_csv$output > 0.8)
+```
+
+From our table result we can see that the False Negative in our case is 36. Or in other words,  this refers to 36 cases where the ad is clicked but the model predicts that it isn’t. 

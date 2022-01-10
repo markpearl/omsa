@@ -1,0 +1,74 @@
+---
+title: "hw10"
+author: "Mark Pearl"
+date: "3/26/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+``
+## Question 14.1
+The breast cancer data set breast-cancer-wisconsin.data.txt from
+http://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/ (description at
+http://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Original%29 ) has missing values.
+1. Use the mean/mode imputation method to impute values for the missing data.
+2. Use regression to impute values for the missing data.
+3. Use regression with perturbation to impute values for the missing data.
+4. (Optional) Compare the results and quality of classification models (e.g., SVM, KNN) build using
+(1) the data sets from questions 1,2,3;
+(2) the data that remains after data points with missing values are removed; and
+(3) the data set when a binary variable is introduced to indicate missing values.
+
+```{r cancer_data, echo=TRUE}
+cancer_data <- read.csv('C:/Users/mjpearl/Desktop/omsa/ISYE-6501-OAN/hw10/breast-cancer-wisconsin.data.txt',header = TRUE)
+summary(cancer_data)
+```
+When we take a look at the summary plot we can see that the bare_nuclei feature contains missing values that we will need to impute, Let's determine the sum of those numbers of missing records before we complete imputation.
+
+1) Using mean/mode imputation method
+
+```{r missing values, echo=TRUE}
+
+library(dplyr)
+sum(cancer_data$bare_nuclei=="?")
+```
+
+Now we can see that the ? values have been replaced correctly and we'll be able to use the mean / mode imputation method on the bare_nuclei column
+
+```{r missing values ctd, echo=TRUE}
+cancer_data$bare_nuclei <- na_if(cancer_data$bare_nuclei,"?")
+sum(cancer_data$bare_nuclei=="?")
+```
+```{r imputation, echo=FALSE}
+library(imputeMissings)
+method1_impute <- impute(cancer_data,method="median/mode")
+sum(is.na(method1_impute$bare_nuclei))
+```
+
+2. Regression Imputation
+
+Now we're going to use regression for the imputation to provide a prediction for the missing value
+We'll first find the indexes for all of the observations that have an NA value.
+```{r imputation ctd, echo=TRUE}
+missing <-which(is.na(cancer_data$bare_nuclei), arr.ind = TRUE)
+
+########################## Regression Imputation #####################
+
+# Not to include the response variable in regression imputation
+data_modified <- cancer_data[-missing, 2:10]
+data_modified$bare_nuclei <- as.integer(data_modified$bare_nuclei)
+
+names(data_modified)
+
+#---- Linear regression Imputation --------
+
+model <- lm(bare_nuclei~clump_thickness+unif_cellsize+unif_cellshape+marg_adhes+single_epitheilial+bland_chromatin+normal_nucleoli+mitoses, data_modified)
+summary(model)
+
+
+# predict V7
+V7_hat <- predict(model, newdata = cancer_data[missing,])
+
+```
+
+15. Optimization is used frequently in the energy to determine the proper resource allocation for power dams on an existing project. Models are run to determine what is the proper constraints to put in place to determine when is the ideal time to do maintenance on assets to avoid shutting down during peak times. Data required is weather data and pricing data.

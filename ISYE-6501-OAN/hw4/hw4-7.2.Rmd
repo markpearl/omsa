@@ -1,0 +1,78 @@
+---
+title: "hw4-7.2"
+author: "Mark Pearl"
+output:
+  pdf_document: default
+  html_document: default
+data_frame$DAY[i]: 2/5/2020
+---
+
+## 7.1
+Question)
+
+Describe a situation or problem from your job, everyday life, current events, etc., for which exponential smoothing would be appropriate. What data would you need? Would you expect the value of alpha (the first smoothing parameter) to be closer to 0 or 1, and why? 
+
+Answer: 
+
+Growing up in a background in agriculture, yields for crops for a given season I would deem to be appropriate for applying exponential smoothing. Yields can be determined by a number of factors including weather, frequency and quality of fertilizers & herbicides, and the amount of rotation for the field (i.e. changing a field to grow a different crop type). I will focus on hay/hailage since it is typically cut several times within a season. 
+
+For every field of hay for the study we would need daily measures of yield from the day it is planted (or conditions are warm enough for changes in yield for cases where not re-seeding is done) up until it is cut. 
+
+This would result in cyclical effects as there are several times (i.e. cuts) a farmers cuts their hay over a given season. Trend would also be present as yields tend to increase for the later cycles of the season. 
+
+Since there wouldn't be too much variability in yields from week to week, I would anticipate that the value for alpha would be closer to 1 in this case to represent not much randomness in our data.
+
+
+Answer:
+
+## 7.2
+Using the 20 years of daily high temperature data for Atlanta (July through October) from Question 6.2 (file temps.txt), build and use an exponential smoothing model to help make a judgment of whether the unofficial end of summer has gotten later over the 20 years.  (Part of the point of this assignment is for you to think about how you might use exponential smoothing to answer this question. Feel free to combine it with other models if you’d like to. There’s certainly more than one reasonable approach.)  
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r cars}
+temps_data <- read.table('C:/Users/mjpearl/Desktop/omsa/ISYE-6501-OAN/hw4/data/temps.txt',header = TRUE, stringsAsFactors = FALSE)
+head(temps_data)
+```
+
+## Create Time Series Data
+In this section we will create a time series data object by passing a vector containing all time-series relevant data and excluding any date variables.
+
+```{r create time series object}
+#Drop the day feature as it has no use to the vector we will be passing to the time series object 
+drops <- c("DAY")
+temps_data <- temps_data[ , !(names(temps_data) %in% drops)]
+
+#Create vector from new dataframe and pass to time_series object creation
+data <- as.vector(unlist(temps_data[,1:20]))
+
+time_series <- ts(data, frequency=123, start=c(1996,7,1),end=c(2015,10,31))
+plot(time_series)
+```
+
+## Run Holt-Winters Test for Exponential Smoothing
+In this section we run the HW test for different combinations either including or not including seasonality and/or trend.
+
+```{r holt winters test for no trend or seasonal component}
+hw_exp <- HoltWinters(time_series,beta=FALSE,gamma=FALSE)
+hw_exp
+```
+
+With the results we can determine that the best value for alpha found was 0.84 with a baseline of 84.22. With such a low value for alpha we can start to create an initial assumption that we shouldn't expect to see much variation over the 20 year period. 
+
+```{r holt winters test with seasonal component}
+hw_exp_trend <- HoltWinters(time_series,beta=FALSE)
+hw_exp_trend
+```
+
+```{r holt winters test trend and seasonal component}
+hw_exp_seasonal <- HoltWinters(time_series)
+hw_exp_seasonal
+```
+
+For the remaining tests where we're testing the exponential with multiplicative seasonality enabled, followed by the second test with both seasonality and trend enabled that we're still experiencing very low values for alpha, beta and gamma. 
+
+From these results we can likely conclude that there isn't varation in the 20 year period.
