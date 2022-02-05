@@ -25,6 +25,7 @@ import numpy as np
 import random
 
 import matplotlib.pyplot as plt
+from models._base_network import _baseNetwork
 
 
 def load_csv(path):
@@ -131,14 +132,22 @@ def generate_batched_data(data, label, batch_size=32, shuffle=False, seed=None):
     #############################################################################
     data_list = []
     label_list = []
+    data = np.array(data)
+    label = np.array(label)
+
+    x = np.array([[0.2, 0.5, 0.3], [0.5, 0.1, 0.4], [0.3, 0.3, 0.4]])
+    y = np.array([1, 2, 0])
+    expected_loss = 0.937803
+
+    
+    #loss = self.model.cross_entropy_loss(x, y)    
 
     combined = list(zip(data,label))
     if shuffle:
         random.shuffle(combined)
-    for idx, (data_sub_list, label) in enumerate(combined):
-        if idx < batch_size:
-            data_list.append(data_sub_list[0:batch_size])
-            label_list.append(label)
+    for idx in range(0,len(label),batch_size):
+        data_list.append(data[idx:idx+batch_size])
+        label_list.append(label[idx:idx+batch_size])
     batched_data = np.array(data_list)
     batched_label = np.array(label_list)
     #############################################################################

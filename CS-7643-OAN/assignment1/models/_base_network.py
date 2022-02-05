@@ -49,11 +49,14 @@ class _baseNetwork:
         #############################################################################
         # TODO:                                                                     #
         #    1) Calculate softmax scores of input images                            #
-        #############################################################################
-        prob= []
+        #############################################################################     
+        
+        prob= np.zeros([scores.shape[0],scores.shape[1]])
         unnorm_probabilities = np.exp(scores)
-        for idx,unnorm_prob in enumerate(unnorm_probabilities):
-            prob[idx]=unnorm_prob/np.sum(unnorm_probabilities)
+        for unnorm_idx,unnorm_prob in enumerate(unnorm_probabilities):
+            for idx, score in enumerate(unnorm_prob):
+                prob[unnorm_idx][idx] = score/np.sum(unnorm_prob)
+        
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -67,12 +70,11 @@ class _baseNetwork:
         :param y: Labels of instances in the batch
         :return: The computed Cross-Entropy Loss
         """
-        loss = None
         #############################################################################
         # TODO:                                                                     #
         #    1) Implement Cross-Entropy Loss                                        #
         #############################################################################
-
+        
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -107,7 +109,7 @@ class _baseNetwork:
         #############################################################################
         # TODO: Comput the sigmoid activation on the input                          #
         #############################################################################
-        out = 1/1+np.exp(-X)
+        out = 1/(1+np.exp(-X))
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -140,7 +142,10 @@ class _baseNetwork:
         #############################################################################
         # TODO: Comput the ReLU activation on the input                          #
         #############################################################################
-        out = np.max(0,X)
+        out= np.zeros([X.shape[0],X.shape[1]])
+        for relu_idx,scores in enumerate(X):
+            for idx, score in enumerate(scores):
+                out[relu_idx][idx] = max(0,score)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -157,9 +162,13 @@ class _baseNetwork:
         #############################################################################
         # TODO: Comput the gradient of ReLU activation                              #
         #############################################################################
-        out = 0
-        if self.ReLU(X) > 0:
-            out = 1
+        out= np.zeros([X.shape[0],X.shape[1]])
+        for relu_idx,scores in enumerate(X):
+            for idx, score in enumerate(scores):
+                if score > 0:
+                    out[relu_idx][idx] = 1
+                else:
+                    out[relu_idx][idx] = 0
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
